@@ -1,7 +1,9 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
 
+<<<<<<< HEAD
 class Users(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     phone_number = models.CharField(max_length=15, null=False, default='')
@@ -16,9 +18,11 @@ class Users(AbstractUser):
     def __str__(self):
         return self.first_name + " " + self.last_name
 
+=======
+>>>>>>> 6d29ca8 (Use Django-provided user model instead)
 class Accounts(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user_id = models.ForeignKey(Users, on_delete=models.CASCADE, null=False)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
     balance = models.IntegerField(default=0, null=False)
     date_opened = models.DateField(auto_now_add = True, null=False)
     account_type = models.CharField(max_length=50, null=False)
