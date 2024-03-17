@@ -2,38 +2,40 @@
 {% load static %}
 
 {% block content %}
-<div class="row">
-<div class = "col-md-6 offset-md-3">
 
-<br>
-<h1>Login</h1>
-
-<form method="POST" action="{% url 'home.html' %}">
-    {% csrf_token %}
-    <form>
-        <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Email address</label>
-          <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
-        </div>
-        <div class="mb-3">
-          <label for="exampleInputPassword1" class="form-label">Password</label>
-          <input type="password" class="form-control" id="exampleInputPassword1">
-        </div>
-        <button type="submit" class="btn btn-secondary">Submit</button>
-      </form>
-
+<div class="row justify-content-center">
+  <div class="col-md-6 text-center">
+    <img src="{% static 'mainApp/images/logo.png' %}" alt="My Company Logo" class="mb-3">
+  </div>
 </div>
 
-<div class = "col-md-3">
+<div class="row justify-content-center">
 
-  <br>
-  <h2>$300 checking bonus</h2>
-   <p>For new customers opening an account with a minimum opening deposit of $30</p>
-  
+  <div class="col-md-3">
+    <h1>Login</h1>
+    <form method="POST" action=""> 
+      {% csrf_token %}
+
+      <div class="mb-3">
+        {{ form.email.label_tag }}
+        {{ form.email }}
+      </div>
+      
+      <div class="mb-3">
+        {{ form.password.label_tag }}
+        {{ form.password }}
+      </div>
+
+      <button type="submit" class="btn btn-secondary">Submit</button>
+
+    </form>
+
+  </div>
+
+  <div class="col-md-3">
+    <h2>$300 checking bonus</h2>
+    <p>For new customers opening an account with a minimum opening deposit of $30</p>
   </div>
 
 </div>
-
-<img src="{% static 'mainApp/images/logo.png' %}" alt="My Company Logo">
-
 {% endblock %}
