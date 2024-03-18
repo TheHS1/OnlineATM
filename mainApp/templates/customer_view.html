@@ -2,9 +2,65 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-4">
 
-    <p>This is the dashboard</p>
-   
+{% include 'navbar.html' %}
+
+<style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    #full-height-container {
+      min-height: 100vh; 
+      display: flex;
+      flex-direction: column;
+      justify-content: center; 
+    }
+</style>
+
+<div class="container" id="full-height-container">
+    <div class="row row-cols-1 row-cols-md-2 g-4 justify-content-center">
+      <div class="col">
+        <a href="{% url 'deposit_view' %}" class="text-decoration-none">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">Deposit</h5>
+              <p class="card-text">Deposit funds into your account.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col">
+        <a href="{% url 'user_settings' %}" class="text-decoration-none">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">Settings</h5>
+              <p class="card-text">Manage your account settings.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col">
+        <a href="{% url 'transaction_history' %}" class="text-decoration-none">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">Transactions</h5>
+              <p class="card-text">View your transaction history.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col">
+        <a href="{% url 'accounts_view' %}" class="text-decoration-none">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">Accounts</h5>
+              <p class="card-text">View and manage your accounts.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
 </div>
+
 {% endblock %}
