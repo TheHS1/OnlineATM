@@ -3,8 +3,6 @@
 
 {% block content %}
 
-{% include 'navbar.html' %}
-
 <style>
     html, body {
       height: 100%;
@@ -56,6 +54,16 @@
             <div class="card-body">
               <h5 class="card-title">Accounts</h5>
               <p class="card-text">View and manage your accounts.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col">
+        <a href="{% url 'transfer_funds' %}" class="text-decoration-none">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">Transfer Funds</h5>
+              <p class="card-text">Transfer funds from one account to another.</p>
             </div>
           </div>
         </a>
