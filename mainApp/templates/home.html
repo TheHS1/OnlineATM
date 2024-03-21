@@ -3,40 +3,47 @@
 
 {% block content %}
 
-<div class="row justify-content-center">
-  <div class="col-md-6 text-center">
-    <img src="{% static 'mainApp/images/logo.png' %}" alt="My Company Logo" class="mb-3">
+<div class="container-fluid p-0">
+
+  <div class="row g-0 vh-100">
+    <div class="col-md-6 d-flex justify-content-center align-items-center bg-black">
+      <div class="text-center p-5">
+        <img src="{% static 'mainApp/images/home_logo.png' %}" alt="Frank Vault Logo" class="img-fluid">
+      </div>
+    </div>
+
+    <div class="col-md-6 d-flex align-items-center">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-md-8 col-lg-6">
+
+            <h1 class="mb-4">Login</h1>
+            <form method="POST" action="">
+              {% csrf_token %}
+
+              <div class="mb-3">
+                {{ form.email.label_tag }}
+                {{ form.email }}
+              </div>
+              
+              <div class="mb-3">
+                {{ form.password.label_tag }}
+                {{ form.password }}
+              </div>
+
+              <button type="submit" class="btn btn-secondary mb-4">Submit</button>
+              <a href="{% url 'register_view' %}" class="d-block mb-4">Don't have an account?</a>
+            </form>
+
+            <h2 class="mb-3">$300 checking bonus</h2>
+            <p>For new customers opening an account with a minimum opening deposit of $30</p>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<div class="row justify-content-center">
-
-  <div class="col-md-3">
-    <h1>Login</h1>
-    <form method="POST" action=""> 
-      {% csrf_token %}
-
-      <div class="mb-3">
-        {{ form.email.label_tag }}
-        {{ form.email }}
-      </div>
-      
-      <div class="mb-3">
-        {{ form.password.label_tag }}
-        {{ form.password }}
-      </div>
-
-      <button type="submit" class="btn btn-secondary">Submit</button>
-      <a href="{% url 'register_view' %}" class="p-2">Don't have an account?</a>
-
-    </form>
-
-  </div>
-
-  <div class="col-md-3">
-    <h2>$300 checking bonus</h2>
-    <p>For new customers opening an account with a minimum opening deposit of $30</p>
-  </div>
-
-</div>
 {% endblock %}
