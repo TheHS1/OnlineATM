@@ -1,2 +1,24 @@
+{% extends 'base.html' %}
 {% block content %}
+
+<body>
+    <h1 class="display-1">Deposit Funds</h1>
+    <br>
+    <form enctype="multipart/form-data" method="POST" action="">
+        {% csrf_token %}
+        <div class="mb-4" onchange="loadFile(event)">
+            {{ form.check.label_tag }}
+            {{ form.check }}
+            <img id="output"/>
+            <script>
+                var loadFile = function(event) {
+                    var output = document.getElementById('output');
+                    output.src = URL.createObjectURL(event.target.files[0]);
+                };
+            </script>
+        </div>       
+        <br>
+        <button type="submit" class="btn btn-secondary">Submit</button>
+      </form>
+</body>
 {% endblock %}
