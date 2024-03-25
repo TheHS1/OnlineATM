@@ -1,6 +1,8 @@
 from django.shortcuts import render
+from django.http import HttpResponseRedirect
 from .forms import LoginForm
 from .forms import RegisterForm
+from .forms import UploadCheckForm 
 
 # Create your views here.
 
@@ -16,7 +18,8 @@ def customer_view(request):
     return render(request, 'customer_view.html')
 
 def deposit_view(request):
-    return render(request, 'deposit_view.html')
+    form = UploadCheckForm(request.POST, request.FILES)
+    return render(request, 'deposit_view.html', {"form": form})
 
 def user_settings(request):
     return render(request, 'user_settings.html')

@@ -1,4 +1,5 @@
 from django import forms
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 class LoginForm(forms.Form):
     email = forms.EmailField(label='Email address', widget=forms.EmailInput(attrs={'class': 'form-control', 'id': 'InputEmail', 'aria-describedby': 'emailHelp'}))
@@ -12,3 +13,6 @@ class RegisterForm(forms.Form):
     address = forms.CharField(max_length=300, widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'inputAddress', 'placeholder': '1234 Main St'}))
     phone_number = forms.CharField(max_length=15, widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'inputPhoneNumber'}))
     pin = forms.CharField(max_length=4, widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'inputPin', 'maxlength': '4'}))
+
+class UploadCheckForm(forms.Form):
+    check = forms.ImageField()
