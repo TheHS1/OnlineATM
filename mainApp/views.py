@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -17,6 +18,13 @@ import qrcode
 from io import BytesIO
 from base64 import b64encode
 >>>>>>> 831d31d (Implement OTP for users)
+=======
+from django.shortcuts import render
+from django.http import HttpResponseRedirect
+from .forms import LoginForm
+from .forms import RegisterForm
+from .forms import UploadCheckForm 
+>>>>>>> f1c00da (created deposit page and image upload form without styling)
 
 # Create your views here.
 
