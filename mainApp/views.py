@@ -1,16 +1,45 @@
-from django.shortcuts import render
-from .forms import LoginForm
-from .forms import RegisterForm
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from .forms import *
+# from django.forms import Form
 
 # Create your views here.
 
 def home(request):
-    form = LoginForm()
+    if request.method == "POST":
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            emailLogin = form.cleaned_data['email']
+            passwordLogin = form.cleaned_data['password']
+            user = authenticate(request, email=emailLogin, password=passwordLogin)
+            
+            if user is not None:
+                login(request, user)
+                return redirect('customer_view')
+            else:
+                form.add_error(None, "Invalid email or password")
+    else:
+        form = LoginForm()
     return render(request, 'home.html', {'form': form})
 
 def register_view(request):
-    form = RegisterForm()
-    return render(request, 'register_view.html', {'form':form})
+
+    if request.method == "POST":
+
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data["password"])
+            user.save()
+            return redirect('home')
+        else:
+            pass
+    else:
+        form = RegisterForm()
+
+    return render(request, 'register_view.html', {'form': form})
 
 def customer_view(request):
     return render(request, 'customer_view.html')
