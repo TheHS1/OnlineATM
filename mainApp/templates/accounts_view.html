@@ -1,6 +1,29 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 
+<style>
+    button {
+        background: none;
+        border: none;
+        padding: 0;
+    }
+</style>
+
+
+<div class="card mb-3" style="max-width: 540px;">
+    <div class="row g-0">
+      <div class="col-md-4 d-flex align-items-center"> 
+        <button name="addCardButton" id="addCardButton"><img src="{% static 'mainApp/images/plus.png' %}" class="img-fluid rounded-start"></button>
+      </div>
+      <div class="col-md-8">
+        <div class="card-body">
+          <h5 class="card-title">Add account</h5>
+          <p class="card-text">Create any kind of account for your desired purposes</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
 {% endblock %}
