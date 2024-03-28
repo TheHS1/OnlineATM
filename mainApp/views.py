@@ -50,7 +50,9 @@ def register_view(request):
             #     phone_number=data['phone_number'],
             # )
             # user_profile.save()
-            form.save()
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data["password"])
+            user.save()
             return redirect('home')
         else:
             print(form.errors)
