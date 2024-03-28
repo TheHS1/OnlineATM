@@ -7,7 +7,12 @@ accountOptions = (('Checkings', 'Checkings'),
                   ('Savings', 'Savings'), ('Business', 'Business'))
 =======
 from django.core.files.uploadedfile import SimpleUploadedFile
+<<<<<<< HEAD
 >>>>>>> f1c00da (created deposit page and image upload form without styling)
+=======
+from django.forms import ModelForm
+from .models import checkTransactions
+>>>>>>> 0134aa4 (Create transaction model and update form)
 
 class LoginForm(forms.Form):
     email = forms.EmailField(label='Email address', widget=forms.EmailInput(attrs={'class': 'form-control', 'id': 'email', 'aria-describedby': 'emailHelp'}))
@@ -30,6 +35,7 @@ class RegisterForm(ModelForm):
         model = Users
         fields = ['first_name', 'last_name', 'email', 'pin', 'password', 'address', 'phone_number']
 
+<<<<<<< HEAD
 class ResetForm(forms.Form):
     email = forms.EmailField(label='Email address', widget=forms.EmailInput(attrs={'class': 'form-control', 'id': 'email', 'aria-describedby': 'emailHelp'}))
     pin = forms.CharField(label='Pin', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'pin'}))
@@ -55,3 +61,9 @@ class RegisterForm(forms.Form):
 class UploadCheckForm(forms.Form):
     check = forms.ImageField()
 >>>>>>> f1c00da (created deposit page and image upload form without styling)
+=======
+class UploadCheckForm(ModelForm):
+    class Meta:
+        model = checkTransactions
+        fields = ["front"]
+>>>>>>> 0134aa4 (Create transaction model and update form)
