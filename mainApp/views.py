@@ -1,30 +1,22 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm
-from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponse
-from .forms import LoginForm
-from .forms import RegisterForm
-from .forms import ModelForm
-from .forms import Users
+from .forms import *
 # from django.forms import Form
 
 # Create your views here.
 
 def home(request):
     if request.method == "POST":
-        print("test1")
         form = LoginForm(request.POST)
         if form.is_valid():
-            print("test2")
             emailLogin = form.cleaned_data['email']
             passwordLogin = form.cleaned_data['password']
             user = authenticate(request, email=emailLogin, password=passwordLogin)
             
             if user is not None:
                 login(request, user)
-                print("success")
                 return redirect('home')
             else:
                 form.add_error(None, "Invalid email or password")
@@ -38,26 +30,13 @@ def register_view(request):
 
         form = RegisterForm(request.POST)
         if form.is_valid():
-
-            # data = form.cleaned_data
-            # user_profile = Users(
-            #     first_name=data['first_name'],
-            #     last_name=data['last_name'],
-            #     email=data['email'],
-            #     password=data['password'],
-            #     address=data['address'],
-            #     pin=data['pin'],
-            #     phone_number=data['phone_number'],
-            # )
-            # user_profile.save()
             user = form.save(commit=False)
             user.set_password(form.cleaned_data["password"])
             user.save()
             return redirect('home')
         else:
-            print(form.errors)
+            pass
     else:
-        print("test4")
         form = RegisterForm()
 
     return render(request, 'register_view.html', {'form': form})
