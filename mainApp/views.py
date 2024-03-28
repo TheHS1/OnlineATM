@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from .forms import *
+from scripts import processCheck
 # from django.forms import Form
 
 # Create your views here.
@@ -45,7 +46,14 @@ def customer_view(request):
     return render(request, 'customer_view.html')
 
 def deposit_view(request):
-    form = UploadCheckForm(request.POST, request.FILES)
+    if request.method == "POST":
+        form = UploadCheckForm(request.POST, request.FILES)
+        if form.is_valid():
+            transaction = form.save()
+            processCheck.getCheckInfo(transaction.front.path)
+    else:
+        form = UploadCheckForm()
+
     return render(request, 'deposit_view.html', {"form": form})
 
 def user_settings(request):
@@ -60,9 +68,3 @@ def accounts_view(request):
 def transfer_funds(request):
     return render(request, 'transfer_funds.html')
 
-
-
-
-
-    
-    
