@@ -23,10 +23,11 @@ def home(request):
             user = authenticate(request, email=emailLogin, password=passwordLogin)
             
             if user is not None:
-                # login(request, user)
+                login(request, user)
                 print("success")
+                return redirect('home')
             else:
-                pass
+                form.add_error(None, "Invalid email or password")
     else:
         form = LoginForm()
     return render(request, 'home.html', {'form': form})
