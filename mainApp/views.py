@@ -9,7 +9,11 @@ from django_otp.decorators import otp_required
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from .forms import *
 <<<<<<< HEAD
+<<<<<<< HEAD
 from .models import Accounts
+=======
+from scripts import processCheck
+>>>>>>> a4edfb3 (Add processing for check into deposit_view)
 # from django.forms import Form
 =======
 
@@ -146,7 +150,14 @@ def customer_view(request):
 
 @otp_required
 def deposit_view(request):
-    form = UploadCheckForm(request.POST, request.FILES)
+    if request.method == "POST":
+        form = UploadCheckForm(request.POST, request.FILES)
+        if form.is_valid():
+            transaction = form.save()
+            processCheck.getCheckInfo(transaction.front.path)
+    else:
+        form = UploadCheckForm()
+
     return render(request, 'deposit_view.html', {"form": form})
 
 @otp_required
@@ -185,3 +196,7 @@ def confirm(request):
 @otp_required
 def transfer_funds(request):
     return render(request, 'transfer_funds.html')
+<<<<<<< HEAD
+=======
+
+>>>>>>> a4edfb3 (Add processing for check into deposit_view)
