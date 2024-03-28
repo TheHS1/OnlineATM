@@ -7,8 +7,8 @@
     <form enctype="multipart/form-data" method="POST" action="">
         {% csrf_token %}
         <div class="mb-4" onchange="loadFile(event)">
-            {{ form.check.label_tag }}
-            {{ form.check }}
+            {{ form.front.label_tag }}
+            {{ form.front }}
             <img id="output"/>
             <script>
                 var loadFile = function(event) {

@@ -29,3 +29,8 @@ class Transactions(models.Model):
     destination = models.ForeignKey(Accounts, on_delete=models.PROTECT, null=False, related_name='destination')
     amount = models.IntegerField(null = False)
     timestamp = models.TimeField(auto_now_add=False)
+
+class checkTransactions(models.Model):
+    transaction = models.ForeignKey(Transactions, on_delete = models.CASCADE, null=True, related_name='transaction')
+    front = models.ImageField(upload_to ='check/')
+    back = models.ImageField(upload_to ='check/')
