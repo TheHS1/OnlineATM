@@ -13,3 +13,11 @@ class RegisterForm(ModelForm):
         model = Users
         fields = ['first_name', 'last_name', 'email', 'pin', 'password', 'address', 'phone_number']
 
+class ResetForm(ModelForm):
+    password1 = forms.CharField(widget=forms.PasswordInput)
+    password2 = forms.CharField(widget=forms.PasswordInput)
+    password3 = forms.CharField(widget=forms.PasswordInput)
+
+    class Meta:
+        model = Users
+        fields = ['email', 'pin', 'password1', 'password2', 'password3']
