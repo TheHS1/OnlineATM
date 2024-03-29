@@ -48,10 +48,7 @@ def reset_password(request):
     if request.method == "POST":
 
         form = ResetForm(request.POST)
-        print("test1")
         if (form.is_valid()) and (form.cleaned_data['password2'] == form.cleaned_data['password3']):
-            print("test2")
-            user = form.save(commit=False)
             emailLogin = form.cleaned_data['email']
             passwordLogin = form.cleaned_data['password1']
             pinLogin = form.cleaned_data['pin']
@@ -59,11 +56,13 @@ def reset_password(request):
             
             if (user is not None):
                 user.set_password(form.cleaned_data["password2"])
+                user.save()
             else:
                 error_message = "Account does not exist."
                 return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
             return redirect('home')
         else:
+            print(form.errors)
             error_message = "Invalid email, password, or pin"
             return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
     else:
