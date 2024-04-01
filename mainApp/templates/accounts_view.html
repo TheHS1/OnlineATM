@@ -9,21 +9,87 @@
         border: none;
         padding: 0;
     }
+    .card-body {
+      min-height: 140px;
+    }
 </style>
 
 
-<div class="card mb-3" style="max-width: 540px;">
-    <div class="row g-0">
-      <div class="col-md-4 d-flex align-items-center"> 
-        <button name="addCardButton" id="addCardButton"><img src="{% static 'mainApp/images/plus.png' %}" class="img-fluid rounded-start"></button>
-      </div>
-      <div class="col-md-8">
-        <div class="card-body">
-          <h5 class="card-title">Add account</h5>
-          <p class="card-text">Create any kind of account for your desired purposes</p>
+<div class="container mt-3">
+  <div class="row row-cols-1 row-cols-md-2 g-4" id="cards-container">
+    
+    <div class="col">
+      <div class="card mb-3">
+        <div class="row g-0">
+          <div class="col-md-4 d-flex align-items-center"> 
+            <button type="button" data-bs-toggle="modal" data-bs-target="#accountModal">
+              <img src="{% static 'mainApp/images/plus.png' %}" class="img-fluid rounded-start">
+            </button>
+          </div>
+          <div class="col-md-8">
+            <div class="card-body">
+              <h5 class="card-title">Open an account</h5>
+              <p class="card-text">Create an account for your needs</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+    <!-- this is where new cards will go here -->
   </div>
+</div>
+
+<div class="modal fade" id="accountModal" tabindex="-1" aria-labelledby="accountModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="accountModalLabel">Add Account</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <select class="form-select" id="accountType">
+          <option value="Checking">Checking</option>
+          <option value="Savings">Savings</option>
+          <option value="Business">Business</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="addAccountCard()">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function addAccountCard() {
+    var accountType = document.getElementById('accountType').value;
+
+    var colDiv = document.createElement('div');
+    colDiv.className = 'col d-flex';
+    colDiv.id = 'account-' + Date.now();  // date.now is temporary, will probably be replaced with randomly generated id
+
+    var cardHtml = `
+      <div class="card mb-3 w-100"> 
+        <div class="card-body d-flex flex-column"> 
+          <h5 class="card-title">${accountType} Account</h5>
+          <p class="card-text flex-grow-1">Balance: $0.00</p>
+          <button onclick="deleteAccountCard('${colDiv.id}')" class="btn btn-danger btn-sm">Close Account</button>
+        </div>
+      </div>
+    `;
+
+    colDiv.innerHTML = cardHtml;
+    document.getElementById('cards-container').appendChild(colDiv);
+
+    var accountModal = bootstrap.Modal.getInstance(document.getElementById('accountModal'));
+    accountModal.hide();
+  }
+
+  function deleteAccountCard(cardId) {
+    var card = document.getElementById(cardId);
+    card.remove();
+  }
+</script>
 
 {% endblock %}
