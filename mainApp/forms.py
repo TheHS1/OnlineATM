@@ -16,3 +16,5 @@ class RegisterForm(forms.Form):
 
 class UploadCheckForm(forms.Form):
     check = forms.ImageField()
+    account = forms.ChoiceField()
+    amount = forms.DecimalField(decimal_places=2, widget=forms.NumberInput(attrs={'class': 'form-control', 'id': 'inputAmount', 'placeholder': '0.00'}))
