@@ -60,6 +60,7 @@ class RegisterForm(forms.Form):
 
 class UploadCheckForm(forms.Form):
     check = forms.ImageField()
+<<<<<<< HEAD
 >>>>>>> f1c00da (created deposit page and image upload form without styling)
 =======
 class UploadCheckForm(ModelForm):
@@ -67,3 +68,7 @@ class UploadCheckForm(ModelForm):
         model = checkTransactions
         fields = ["front"]
 >>>>>>> 0134aa4 (Create transaction model and update form)
+=======
+    account = forms.ChoiceField()
+    amount = forms.DecimalField(decimal_places=2, widget=forms.NumberInput(attrs={'class': 'form-control', 'id': 'inputAmount', 'placeholder': '0.00'}))
+>>>>>>> 8f52a6f (added amount and account entries to deposit form, as well as confirmation warning)

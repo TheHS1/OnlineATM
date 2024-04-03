@@ -2,23 +2,40 @@
 {% block content %}
 
 <body>
+
     <h1 class="display-1">Deposit Funds</h1>
-    <br>
-    <form enctype="multipart/form-data" method="POST" action="">
+    <hr/>
+    <form enctype="multipart/form-data" method="POST" action="" onsubmit="return confirm('All information confirmed & ready to submit?');">
         {% csrf_token %}
+<<<<<<< HEAD
         <div class="mb-4" onchange="loadFile(event)">
             {{ form.front.label_tag }}
             {{ form.front }}
             <img id="output"/>
+=======
+        <div class="mb-4 col-7" onchange="loadFile(event)">
+            <b>Upload check:</b>
+            {{ form.check }}
+            <img class="rounded" style="max-width: 500px; max-height: 300px" id="output"/>
+>>>>>>> 8f52a6f (added amount and account entries to deposit form, as well as confirmation warning)
             <script>
                 var loadFile = function(event) {
                     var output = document.getElementById('output');
                     output.src = URL.createObjectURL(event.target.files[0]);
                 };
-            </script>
-        </div>       
-        <br>
+            </script>       
+        </div>     
+
+        <div class="mb-4 col-2"> 
+            <b>Deposit to:</b>
+            {{ form.account }}
+        </div>
+
+        <div class="mb-4 col-2"> 
+            <b>Enter amount:</b>
+            {{ form.amount }}
+        </div>
         <button type="submit" class="btn btn-secondary">Submit</button>
-      </form>
+    </form>
 </body>
 {% endblock %}
