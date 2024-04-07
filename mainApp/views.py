@@ -2,33 +2,88 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
+from django_otp import devices_for_user, login as verifyOTP
+from django_otp.decorators import otp_required
+from django_otp.plugins.otp_totp.models import TOTPDevice
 from .forms import *
-# from django.forms import Form
+
+# For generating otp qr codes
+import qrcode
+from io import BytesIO
+from base64 import b64encode
 
 # Create your views here.
 
 def home(request):
     if request.method == "POST":
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            emailLogin = form.cleaned_data['email']
-            passwordLogin = form.cleaned_data['password']
-            user = authenticate(request, email=emailLogin, password=passwordLogin)
-            
-            if user is not None:
-                login(request, user)
-                return redirect('customer_view')
-            else:
-                error_message = "Invalid username or password."
+        devices = devices_for_user(request.user, confirmed=None)
+
+        # check if otp form was submitted or normal login form
+        if ('verify' in request.POST):
+            form = OtpForm(request.POST)
+
+            # check if submitted token matches device token
+            if form.is_valid():
+                token = form.cleaned_data['otp_token']
+                for device in devices:
+                    if isinstance(device, TOTPDevice) and device.verify_token(token):
+                        if device.confirmed == False:
+                            device.confirmed = True;
+                            device.save()
+                        verifyOTP(request, device)
+                        return redirect('customer_view')
+                error_message = "Incorrect OTP code"
+                form = OtpForm()
+                return render(request, 'home.html', {'form': form, 'title': 'Verify your identity', 'error_message': error_message})
+        else:
+            hasDevice = False
+            form = LoginForm(request.POST)
+
+            # login user if valid
+            if form.is_valid():
+                emailLogin = form.cleaned_data['email']
+                passwordLogin = form.cleaned_data['password']
+
+                user = authenticate(request, email=emailLogin, password=passwordLogin)
+                
+                if user is not None:
+                    login(request, user)
+                    # Check if the user has a registered otp device
+                    for device in devices:
+                        if isinstance(device, TOTPDevice):
+                            hasDevice = True
+                    if hasDevice:
+                        form = OtpForm()
+                        return render(request, 'home.html', {'form': form, 'title': 'Verify your identity'})
+                    return redirect(otp_register)
+                else:
+                    error_message = "Invalid username or password."
                 return render(request, 'home.html', {'form': form, 'error_message': error_message})
     else:
         form = LoginForm()
+        if request.user.is_verified():
+            return redirect('customer_view')
     return render(request, 'home.html', {'form': form})
 
+@login_required
+def otp_register(request):
+    devices = devices_for_user(request.user, confirmed=None)
+    for device in devices:
+        if isinstance(device, TOTPDevice):
+            return redirect('home')
+
+    device = request.user.totpdevice_set.create(confirmed=False)
+    url = device.config_url
+    qr_code_img = qrcode.make(device.config_url)
+    buffer = BytesIO()
+    qr_code_img.save(buffer)
+    buffer.seek(0)
+    encoded_img = b64encode(buffer.read()).decode()
+    qr_code_data = f'data:image/png;base64, {encoded_img}'
+    return render(request, 'otp_register.html', {'url': url, 'qrcode': qr_code_data})
+
 def register_view(request):
-
     if request.method == "POST":
-
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
@@ -44,9 +99,7 @@ def register_view(request):
     return render(request, 'register_view.html', {'form': form})
 
 def reset_password(request):
-
     if request.method == "POST":
-
         form = ResetForm(request.POST)
         if (form.is_valid()) and (form.cleaned_data['password2'] == form.cleaned_data['password3']):
             emailLogin = form.cleaned_data['email']
@@ -70,27 +123,26 @@ def reset_password(request):
 
     return render(request, 'reset_password.html', {'form': form})
 
+@otp_required
 def customer_view(request):
     return render(request, 'customer_view.html')
 
+@otp_required
 def deposit_view(request):
     return render(request, 'deposit_view.html')
 
+@otp_required
 def user_settings(request):
     return render(request, 'user_settings.html')
 
+@otp_required
 def transaction_history(request):
     return render(request, 'transaction_history.html')
 
+@otp_required
 def accounts_view(request):
     return render(request, 'accounts_view.html')
 
+@otp_required
 def transfer_funds(request):
     return render(request, 'transfer_funds.html')
-
-
-
-
-
-    
-    

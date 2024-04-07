@@ -17,10 +17,23 @@
         <div class="row justify-content-center">
           <div class="col-md-8 col-lg-6">
 
+            {% if title %}
+            <h1 class="mb-4">{{ title }}</h1>
+            {% else %}
             <h1 class="mb-4">Login</h1>
+            {% endif %}
+
             <form method="POST" action="">
               {% csrf_token %}
 
+              {% if form.otp_token %}
+              <div class="mb-4">
+                {{ form.otp_token.label_tag }}
+                {{ form.otp_token }}
+              </div>
+              <button type="submit" class="btn btn-secondary mb-4" name='verify'>Verify</button>
+
+              {% else %}
               <div class="mb-3">
                 {{ form.email.label_tag }}
                 {{ form.email }}
@@ -30,12 +43,17 @@
                 {{ form.password.label_tag }}
                 {{ form.password }}
               </div>
+              <button type="submit" class="btn btn-secondary mb-4" name='submit'>Submit</button>
+              {% endif %}
+
               {% if error_message %}
                 <p>{{ error_message }}</p>
               {% endif %}
-              <button type="submit" class="btn btn-secondary mb-4">Submit</button>
+
+              {% if not form.otp_token %}
               <a href="{% url 'reset_password' %}" class="d-block mb-4">Forgot Password?</a>
               <a href="{% url 'register_view' %}" class="d-block mb-4">Don't have an account?</a>
+              {% endif %}
             </form>
 
             <h2 class="mb-3">$300 checking bonus</h2>
