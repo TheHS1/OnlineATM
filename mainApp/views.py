@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from .forms import *
 # from django.forms import Form
+from .models import *
 
 # Create your views here.
 
@@ -80,7 +81,12 @@ def user_settings(request):
     return render(request, 'user_settings.html')
 
 def transaction_history(request):
-    return render(request, 'transaction_history.html')
+
+    user_accounts = Accounts.objects.filter(user_id=request.user)
+    transactions = Transactions.objects.filter(source__in=user_accounts) | Transactions.objects.filter(destination__in=user_accounts)
+    transactions = transactions.order_by('-timestamp')
+
+    return render(request, 'transaction_history.html', {'transactions': transactions})
 
 def accounts_view(request):
     return render(request, 'accounts_view.html')
