@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from .forms import *
+from .models import Accounts
 # from django.forms import Form
 
 # Create your views here.
@@ -26,9 +27,7 @@ def home(request):
     return render(request, 'home.html', {'form': form})
 
 def register_view(request):
-
     if request.method == "POST":
-
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
@@ -40,13 +39,10 @@ def register_view(request):
             return render(request, 'register_view.html', {'form': form, 'error_message': error_message})
     else:
         form = RegisterForm()
-
     return render(request, 'register_view.html', {'form': form})
 
 def reset_password(request):
-
     if request.method == "POST":
-
         form = ResetForm(request.POST)
         if (form.is_valid()) and (form.cleaned_data['password2'] == form.cleaned_data['password3']):
             emailLogin = form.cleaned_data['email']
@@ -84,7 +80,26 @@ def transaction_history(request):
     return render(request, 'transaction_history.html')
 
 def accounts_view(request):
-    return render(request, 'accounts_view.html')
+    if request.method == "POST":
+        if 'delete' in request.POST and request.user.is_authenticated:
+            account_id = request.POST['account_id']
+            if Accounts.objects.filter(user_id=request.user, id=account_id).delete():
+                return redirect("confirm")
+        elif 'add' in request.POST and request.user.is_authenticated:
+            form = addAccountForm(request.POST)
+            if form.is_valid():
+                type = form.cleaned_data["accountType"]
+                account = Accounts.objects.create(account_type=type, user_id=request.user)
+                account.save()
+                return redirect("confirm")
+        return redirect("accounts_view");
+
+    form = addAccountForm()
+    accounts = Accounts.objects.filter(user_id=request.user)
+    return render(request, 'accounts_view.html', {'form': form, 'accounts': accounts})
+
+def confirm(request):
+    return render(request, 'confirmation.html')
 
 def transfer_funds(request):
     return render(request, 'transfer_funds.html')
