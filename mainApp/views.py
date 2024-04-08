@@ -20,6 +20,7 @@ from .models import Accounts, Transactions
 from scripts import processCheck
 >>>>>>> a4edfb3 (Add processing for check into deposit_view)
 # from django.forms import Form
+<<<<<<< HEAD
 =======
 
 # For generating otp qr codes
@@ -34,6 +35,9 @@ from .forms import LoginForm
 from .forms import RegisterForm
 from .forms import UploadCheckForm 
 >>>>>>> f1c00da (created deposit page and image upload form without styling)
+=======
+from .models import *
+>>>>>>> f18bf0b (Added transaction_history view and html page)
 
 # Create your views here.
 
@@ -188,7 +192,12 @@ def user_settings(request):
 
 @otp_required
 def transaction_history(request):
-    return render(request, 'transaction_history.html')
+
+    user_accounts = Accounts.objects.filter(user_id=request.user)
+    transactions = Transactions.objects.filter(source__in=user_accounts) | Transactions.objects.filter(destination__in=user_accounts)
+    transactions = transactions.order_by('-timestamp')
+
+    return render(request, 'transaction_history.html', {'transactions': transactions})
 
 @otp_required
 def accounts_view(request):
