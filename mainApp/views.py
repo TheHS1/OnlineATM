@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.http import HttpResponse
 from .forms import *
 from .models import Accounts
@@ -88,6 +89,7 @@ def accounts_view(request):
         if 'delete' in request.POST and request.user.is_authenticated:
             account_id = request.POST['account_id']
             if Accounts.objects.filter(user_id=request.user, id=account_id).delete():
+                messages.success(request, "Account closed successfully.")
                 return redirect("confirm")
         elif 'add' in request.POST and request.user.is_authenticated:
             form = addAccountForm(request.POST)
@@ -95,6 +97,7 @@ def accounts_view(request):
                 type = form.cleaned_data["accountType"]
                 account = Accounts.objects.create(account_type=type, user_id=request.user)
                 account.save()
+                messages.success(request, "Account opened successfully.")
                 return redirect("confirm")
         return redirect("accounts_view");
 
