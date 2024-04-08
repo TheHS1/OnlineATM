@@ -3,6 +3,15 @@
 
 {% block content %}
 
-<h1>Congratulations you did the action</h1>
+<div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+  <div class="text-center">
+    {% if messages %}
+      {% for message in messages %}
+        <h1 {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</h1>
+      {% endfor %}
+      <a href="{% url 'accounts_view' %}" class="btn btn-secondary mt-3">View accounts</a>
+    {% endif %}
+  </div>
+</div>
 
 {% endblock %}
