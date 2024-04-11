@@ -190,3 +190,53 @@ def confirm(request):
 @otp_required
 def transfer_funds(request):
     return render(request, 'transfer_funds.html')
+
+def atm_login(request):
+    if request.method == "POST":
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            pin = form.cleaned_data['pin']
+            user = authenticate(request, email=email, pin=pin)
+            
+            if user is not None:
+                login(request, user)
+                # Redirect the user to the appropriate URL after successful login
+                return redirect('ATM.html')  # Redirect to ATM.html
+            else:
+                # If authentication fails, add an error to the form
+                form.add_error(None, "Invalid email or PIN")
+    else:
+        form = LoginForm()
+    
+    return render(request, 'atm_login.html', {'form': form})
+
+
+def atm_page(request):
+    return render(request, 'ATM.html')
+
+#def withdrawal(request):
+    if request.method == "POST":
+        account_id = request.POST.get('account')
+        withdrawal_amount = int(request.POST.get('withdrawal_amount'))
+
+        # Retrieve the selected account
+        account = Accounts.objects.get(pk=account_id)
+
+        # Check if the withdrawal amount exceeds the available balance
+        if withdrawal_amount > account.balance:
+            # Display error message if the withdrawal amount is greater than the available balance
+            messages.error(request, "Insufficient funds. Please enter a lower withdrawal amount.")
+            return redirect('withdrawal')
+
+        # Subtract withdrawal amount from the account balance
+        account.balance -= withdrawal_amount
+        account.save()
+
+        # Redirect to a success page or another view
+        return redirect('success_page')
+
+    # Fetch user's accounts to populate the dropdown
+    accounts = request.user.accounts.all()  # Assuming the user's accounts are related to the user model
+
+    return render(request, 'withdrawal.html', {'accounts': accounts})
