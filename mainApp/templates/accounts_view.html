@@ -1,6 +1,91 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block content %}
 
+<style>
+    button {
+        background: none;
+        border: none;
+        padding: 0;
+    }
+    .card-body {
+      min-height: 140px;
+    }
+    .card-container {
+      position: relative;
+      min-height: 140px;
+    }
+    .card-id {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 0.8em; 
+    }
+</style>
+
+
+<div class="container mt-3">
+  <div class="row row-cols-1 row-cols-md-2 g-4" id="cards-container">
+    
+    <div class="col">
+      <div class="card mb-3">
+        <div class="row g-0">
+          <div class="col-md-4 d-flex align-items-center"> 
+            <button type="button" data-bs-toggle="modal" data-bs-target="#accountModal">
+              <img src="{% static 'mainApp/images/plus.png' %}" class="img-fluid rounded-start">
+            </button>
+          </div>
+          <div class="col-md-8">
+            <div class="card-body">
+              <h5 class="card-title">Open an account</h5>
+              <p class="card-text">Create an account for your needs</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- this is where new cards will go here -->
+    {% for account in accounts %}
+    <div class="col d-flex" id={{ account.id }}>
+        <div class="card mb-3 w-100 card-container"> 
+          <p class="card-id font-monospace">{{ account.id }}</p>
+            <div class="card-body d-flex flex-column"> 
+                <h5 class="card-title">{{ account.account_type }}</h5>
+                <p class="card-text flex-grow-1">Balance: ${{ account.balance}}</p>
+                <form method="POST" action="">
+                  {% csrf_token %}
+                  <input type="hidden" name=account_id value={{ account.id }}>
+                  <button type="submit" class="btn btn-danger btn-sm" style="width: 100%" name="delete">Close Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="modal fade" id="accountModal" tabindex="-1" aria-labelledby="accountModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="accountModalLabel">Add Account</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="">
+          {% csrf_token %}
+          {{ form.accountType.label_tag }}
+          {{ form.accountType }}
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary" name="add">Done</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
 {% endblock %}
