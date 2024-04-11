@@ -40,6 +40,9 @@
           </div>
         </div>
         <div class="text-center">
+          {% if error_message %}
+            <p>{{ error_message }}</p>
+          {% endif %}
           <button type="submit" class="btn btn-secondary">Sign up</button>
         </div>
       </form>
