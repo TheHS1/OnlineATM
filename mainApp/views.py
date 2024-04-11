@@ -150,6 +150,7 @@ def customer_view(request):
 
 @otp_required
 def deposit_view(request):
+<<<<<<< HEAD
     if request.method == "POST":
         form = UploadCheckForm(request.POST, request.FILES)
         if form.is_valid():
@@ -159,6 +160,11 @@ def deposit_view(request):
         form = UploadCheckForm()
 
     return render(request, 'deposit_view.html', {"form": form})
+=======
+    form = UploadCheckForm(request.POST, request.FILES)
+    form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user)
+    return render(request, 'deposit_view.html', {'form': form})
+>>>>>>> 96ff81d (Show accounts choice on page)
 
 @otp_required
 def user_settings(request):
