@@ -72,7 +72,8 @@ def customer_view(request):
 
 def deposit_view(request):
     form = UploadCheckForm(request.POST, request.FILES)
-    return render(request, 'deposit_view.html', {"form": form})
+    form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user)
+    return render(request, 'deposit_view.html', {'form': form})
 
 def user_settings(request):
     return render(request, 'user_settings.html')
