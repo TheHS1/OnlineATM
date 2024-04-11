@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse
 from .forms import *
-from .models import Accounts
+from .models import Accounts, Transactions
 
 from scripts import processCheck
 
@@ -76,8 +76,11 @@ def deposit_view(request):
         form = UploadCheckForm(request.POST, request.FILES)
         form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user)
         if form.is_valid():
-            # transaction = form.save()
-            # processCheck.getCheckInfo(transaction.front.path)
+            dest = form.cleaned_data["account"]
+            amt = form.cleaned_data["amount"]
+            checkTransaction = form.save()
+            processCheck.getCheckInfo(checkTransaction.front.path)
+            transaction = Transactions.objects.create(destination=dest, source=dest, amount=amt)
             messages.success(request, "Check deposited Successfully.")
             return redirect("confirm")
             pass
