@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATM Login</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        h2 {
+            font-size: 32px;
+            margin-bottom: 30px;
+        }
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        form {
+            background-color: #333333;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        input[type="email"],
+        input[type="password"] {
+            width: 300px;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button[type="submit"] {
+            padding: 12px 24px;
+            background-color: #ffd700;
+            color: #000000;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button[type="submit"]:hover {
+            background-color: #ffdf00; /* Lighter shade of gold on hover */
+        }
+        .customer-images {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .customer-images img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 10px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <h2>ATM Login</h2>
+    <div class="login-container">
+        <form action="ATM.html" method="post">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required><br>
+            <label for="pin">PIN:</label>
+            <input type="password" id="pin" name="pin" required><br>
+            <button type="submit">Login</button>
+        </form>
+        <div class="customer-images">
+            <img src="happy_customer_1.jpg" alt="Happy Customer 1">
+            <img src="happy_customer_2.jpg" alt="Happy Customer 2">
+            <img src="happy_customer_3.jpg" alt="Happy Customer 3">
+        </div>
+    </div>
+</body>
+</html>
