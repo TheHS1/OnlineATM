@@ -23,9 +23,17 @@ class Accounts(models.Model):
     date_opened = models.DateField(auto_now_add = True, null=False)
     account_type = models.CharField(max_length=50, null=False)
 
+    def __str__(self):
+        return str(self.id) + " (" + self.account_type + ")" 
+
 class Transactions(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     source = models.ForeignKey(Accounts, on_delete=models.PROTECT, null=False, related_name='source')
     destination = models.ForeignKey(Accounts, on_delete=models.PROTECT, null=False, related_name='destination')
     amount = models.IntegerField(null = False)
-    timestamp = models.TimeField(auto_now_add=False)
+    timestamp = models.TimeField(auto_now_add=True)
+
+class checkTransactions(models.Model):
+    transaction = models.ForeignKey(Transactions, on_delete = models.CASCADE, null=True, related_name='transaction')
+    front = models.ImageField(upload_to ='check/')
+    back = models.ImageField(upload_to ='check/')

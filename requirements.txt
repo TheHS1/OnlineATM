@@ -5,3 +5,5 @@ mysqlclient==2.2.4
 python-decouple==3.8
 pillow==10.2.0
 qrcode==7.4.2
+easyocr==1.7.1
+opencv-python==4.9.0.80

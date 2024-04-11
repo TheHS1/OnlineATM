@@ -7,8 +7,9 @@ from django_otp import devices_for_user, login as verifyOTP
 from django_otp.decorators import otp_required
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from .forms import *
-from .models import Accounts
-# from django.forms import Form
+from .models import Accounts, Transactions
+
+from scripts import processCheck
 
 # For generating otp qr codes
 import qrcode
@@ -131,7 +132,21 @@ def customer_view(request):
 
 @otp_required
 def deposit_view(request):
-    form = UploadCheckForm(request.POST, request.FILES)
+    if request.method == "POST":
+        form = UploadCheckForm(request.POST, request.FILES)
+        form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user)
+        if form.is_valid():
+            dest = form.cleaned_data["account"]
+            amt = form.cleaned_data["amount"]
+            checkTransaction = form.save()
+            processCheck.getCheckInfo(checkTransaction.front.path)
+            transaction = Transactions.objects.create(destination=dest, source=dest, amount=amt)
+            messages.success(request, "Check deposited Successfully.")
+            return redirect("confirm")
+            pass
+
+    form = UploadCheckForm()
+    form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user)
     return render(request, 'deposit_view.html', {"form": form})
 
 @otp_required

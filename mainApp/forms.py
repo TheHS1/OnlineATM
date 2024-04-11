@@ -1,6 +1,9 @@
 from django import forms
 from django.forms import ModelForm
 from .models import Users
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.forms import ModelForm
+from .models import checkTransactions
 
 accountOptions = (('Checkings', 'Checkings'), 
                   ('Savings', 'Savings'), ('Business', 'Business'))
@@ -25,6 +28,13 @@ class RegisterForm(ModelForm):
         model = Users
         fields = ['first_name', 'last_name', 'email', 'pin', 'password', 'address', 'phone_number']
 
+class UploadCheckForm(ModelForm):
+    account = forms.ModelChoiceField(queryset=None)
+    amount = forms.DecimalField(decimal_places=2, widget=forms.NumberInput(attrs={'class': 'form-control', 'id': 'inputAmount', 'placeholder': '0.00'}))
+    class Meta:
+        model = checkTransactions
+        fields = ["front"]
+
 class ResetForm(forms.Form):
     email = forms.EmailField(label='Email address', widget=forms.EmailInput(attrs={'class': 'form-control', 'id': 'email', 'aria-describedby': 'emailHelp'}))
     pin = forms.CharField(label='Pin', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'pin'}))
@@ -34,3 +44,4 @@ class ResetForm(forms.Form):
 
 class addAccountForm(forms.Form):
     accountType = forms.ChoiceField(label='AccountType', widget=forms.Select(attrs={'class': 'form-select', 'id': 'accountType'}), choices=accountOptions)
+
