@@ -10,8 +10,13 @@ from django_otp.plugins.otp_totp.models import TOTPDevice
 from .forms import *
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from .models import Accounts
 =======
+=======
+from .models import Accounts, Transactions
+
+>>>>>>> 235719b (Insert transaction into database)
 from scripts import processCheck
 >>>>>>> a4edfb3 (Add processing for check into deposit_view)
 # from django.forms import Form
@@ -154,10 +159,21 @@ def deposit_view(request):
     if request.method == "POST":
         form = UploadCheckForm(request.POST, request.FILES)
         if form.is_valid():
+<<<<<<< HEAD
             transaction = form.save()
             processCheck.getCheckInfo(transaction.front.path)
     else:
         form = UploadCheckForm()
+=======
+            dest = form.cleaned_data["account"]
+            amt = form.cleaned_data["amount"]
+            checkTransaction = form.save()
+            processCheck.getCheckInfo(checkTransaction.front.path)
+            transaction = Transactions.objects.create(destination=dest, source=dest, amount=amt)
+            messages.success(request, "Check deposited Successfully.")
+            return redirect("confirm")
+            pass
+>>>>>>> 235719b (Insert transaction into database)
 
     return render(request, 'deposit_view.html', {"form": form})
 =======
