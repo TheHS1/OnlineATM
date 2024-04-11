@@ -1,5 +1,27 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
+<div class="container my-5">
+  <h2 class="mb-4">My Transactions</h2>
+  <table class="table table-striped table-bordered">
+    <thead class="table-dark">
+      <tr>
+        <th scope="col">Source</th>
+        <th scope="col">Destination</th>
+        <th scope="col">Amount</th>
+        <th scope="col">Timestamp</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for transaction in transactions %}
+      <tr>
+        <td>{{ transaction.source.id }}</td>
+        <td>{{ transaction.destination.id }}</td>
+        <td>{{ transaction.amount }}</td>
+        <td>{{ transaction.timestamp }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

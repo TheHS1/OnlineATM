@@ -7,7 +7,7 @@ from django_otp import devices_for_user, login as verifyOTP
 from django_otp.decorators import otp_required
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from .forms import *
-from .models import Accounts, Transactions
+from .models import *
 
 from scripts import processCheck
 
@@ -155,7 +155,12 @@ def user_settings(request):
 
 @otp_required
 def transaction_history(request):
-    return render(request, 'transaction_history.html')
+
+    user_accounts = Accounts.objects.filter(user_id=request.user)
+    transactions = Transactions.objects.filter(source__in=user_accounts) | Transactions.objects.filter(destination__in=user_accounts)
+    transactions = transactions.order_by('-timestamp')
+
+    return render(request, 'transaction_history.html', {'transactions': transactions})
 
 @otp_required
 def accounts_view(request):
