@@ -12,6 +12,16 @@
     .card-body {
       min-height: 140px;
     }
+    .card-container {
+      position: relative;
+      min-height: 140px;
+    }
+    .card-id {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 0.8em; 
+    }
 </style>
 
 
@@ -38,9 +48,10 @@
     <!-- this is where new cards will go here -->
     {% for account in accounts %}
     <div class="col d-flex" id={{ account.id }}>
-        <div class="card mb-3 w-100"> 
+        <div class="card mb-3 w-100 card-container"> 
+          <p class="card-id font-monospace">{{ account.id }}</p>
             <div class="card-body d-flex flex-column"> 
-                <h5 class="card-title">{{ account.account_type }} Account</h5>
+                <h5 class="card-title">{{ account.account_type }}</h5>
                 <p class="card-text flex-grow-1">Balance: ${{ account.balance}}</p>
                 <form method="POST" action="">
                   {% csrf_token %}
