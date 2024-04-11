@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+        {% if url %}
+        Google Authenticator link: <a href="{{ url }}">{{ url }}</a>
+        Or scan the QR code: <img src="{{ qrcode }}">
+        {% endif %}
+    </div>
+    <a href="/">Return to login</a>
+  </div>
+</div>
+
+{% endblock %}
