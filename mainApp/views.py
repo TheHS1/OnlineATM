@@ -191,6 +191,13 @@ def accounts_view(request):
 def confirm(request):
     return render(request, 'confirmation.html')
 
+    form = addAccountForm()
+    accounts = Accounts.objects.filter(user_id=request.user)
+    return render(request, 'accounts_view.html', {'form': form, 'accounts': accounts})
+
+def confirm(request):
+    return render(request, 'confirmation.html')
+
 @otp_required
 def transfer_funds(request):
     return render(request, 'transfer_funds.html')

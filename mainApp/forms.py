@@ -8,6 +8,9 @@ from .models import checkTransactions
 accountOptions = (('Checkings', 'Checkings'), 
                   ('Savings', 'Savings'), ('Business', 'Business'))
 
+accountOptions = (('Checkings', 'Checkings'), 
+                  ('Savings', 'Savings'), ('Business', 'Business'))
+
 class LoginForm(forms.Form):
     email = forms.EmailField(label='Email address', widget=forms.EmailInput(attrs={'class': 'form-control', 'id': 'email', 'aria-describedby': 'emailHelp'}))
     password = forms.CharField(label='Password', widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'password'}))
@@ -44,4 +47,3 @@ class ResetForm(forms.Form):
 
 class addAccountForm(forms.Form):
     accountType = forms.ChoiceField(label='AccountType', widget=forms.Select(attrs={'class': 'form-select', 'id': 'accountType'}), choices=accountOptions)
-
