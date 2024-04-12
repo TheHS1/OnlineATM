@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -8,40 +7,14 @@ from django_otp import devices_for_user, login as verifyOTP
 from django_otp.decorators import otp_required
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from .forms import *
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-from .models import Accounts
-=======
-=======
-from .models import Accounts, Transactions
+from .models import *
 
->>>>>>> 235719b (Insert transaction into database)
 from scripts import processCheck
->>>>>>> a4edfb3 (Add processing for check into deposit_view)
-=======
-
->>>>>>> a994853 (atm login and atm page added and authentification)
-# from django.forms import Form
-<<<<<<< HEAD
-=======
 
 # For generating otp qr codes
 import qrcode
 from io import BytesIO
 from base64 import b64encode
->>>>>>> 831d31d (Implement OTP for users)
-=======
-from django.shortcuts import render
-from django.http import HttpResponseRedirect
-from .forms import LoginForm
-from .forms import RegisterForm
-from .forms import UploadCheckForm 
->>>>>>> f1c00da (created deposit page and image upload form without styling)
-=======
-from .models import *
->>>>>>> f18bf0b (Added transaction_history view and html page)
 
 # Create your views here.
 
@@ -163,16 +136,10 @@ def customer_view(request):
 
 @otp_required
 def deposit_view(request):
-<<<<<<< HEAD
     if request.method == "POST":
         form = UploadCheckForm(request.POST, request.FILES)
+        form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user)
         if form.is_valid():
-<<<<<<< HEAD
-            transaction = form.save()
-            processCheck.getCheckInfo(transaction.front.path)
-    else:
-        form = UploadCheckForm()
-=======
             dest = form.cleaned_data["account"]
             amt = form.cleaned_data["amount"]
             checkTransaction = form.save()
@@ -181,14 +148,10 @@ def deposit_view(request):
             messages.success(request, "Check deposited Successfully.")
             return redirect("confirm")
             pass
->>>>>>> 235719b (Insert transaction into database)
 
-    return render(request, 'deposit_view.html', {"form": form})
-=======
-    form = UploadCheckForm(request.POST, request.FILES)
+    form = UploadCheckForm()
     form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user)
-    return render(request, 'deposit_view.html', {'form': form})
->>>>>>> 96ff81d (Show accounts choice on page)
+    return render(request, 'deposit_view.html', {"form": form})
 
 @otp_required
 def user_settings(request):
@@ -231,12 +194,7 @@ def confirm(request):
 @otp_required
 def transfer_funds(request):
     return render(request, 'transfer_funds.html')
-<<<<<<< HEAD
-=======
 
-<<<<<<< HEAD
->>>>>>> a4edfb3 (Add processing for check into deposit_view)
-=======
 def atm_login(request):
     if request.method == "POST":
         form = LoginForm(request.POST)
@@ -286,11 +244,3 @@ def atm_page(request):
     accounts = request.user.accounts.all()  # Assuming the user's accounts are related to the user model
 
     return render(request, 'withdrawal.html', {'accounts': accounts})
-
-
-
-
-
-    
-    
->>>>>>> a994853 (atm login and atm page added and authentification)
