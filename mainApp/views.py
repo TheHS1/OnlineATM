@@ -117,9 +117,13 @@ def reset_password(request):
                 error_message = "Account does not exist."
                 return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
             return redirect('home')
+        
+        elif ((form.cleaned_data['password2'] != form.cleaned_data['password3'])):
+            error_message = "Passwords do not match"
+            return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
+        
         else:
-            print(form.errors)
-            error_message = "Invalid email, password, or pin"
+            error_message = "Invalid email or pin"
             return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
     else:
         form = ResetForm()
