@@ -135,6 +135,12 @@ def customer_view(request):
     return render(request, 'customer_view.html')
 
 @otp_required
+def logout_view(request):
+    logout(request)
+    messages.success(request, "Sucessfully logged out")
+    return redirect('home')
+
+@otp_required
 def deposit_view(request):
     if request.method == "POST":
         form = UploadCheckForm(request.POST, request.FILES)
