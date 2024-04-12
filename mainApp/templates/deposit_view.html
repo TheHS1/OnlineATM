@@ -9,7 +9,7 @@
         {% csrf_token %}
         <div class="mb-4 col-7" onchange="loadFile(event)">
             <b>Upload check:</b>
-            {{ form.check }}
+            {{ form.front }}
             <img class="rounded" style="max-width: 500px; max-height: 300px" id="output"/>
             <script>
                 var loadFile = function(event) {

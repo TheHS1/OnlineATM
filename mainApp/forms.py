@@ -47,3 +47,4 @@ class ResetForm(forms.Form):
 
 class addAccountForm(forms.Form):
     accountType = forms.ChoiceField(label='AccountType', widget=forms.Select(attrs={'class': 'form-select', 'id': 'accountType'}), choices=accountOptions)
+
