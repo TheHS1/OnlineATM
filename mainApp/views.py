@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from .forms import *
 from .models import Accounts, Transactions
+import uuid
 
 from scripts import processCheck
 
@@ -78,12 +79,39 @@ def deposit_view(request):
         if form.is_valid():
             dest = form.cleaned_data["account"]
             amt = form.cleaned_data["amount"]
+
             checkTransaction = form.save()
-            processCheck.getCheckInfo(checkTransaction.front.path)
-            transaction = Transactions.objects.create(destination=dest, source=dest, amount=amt)
-            messages.success(request, "Check deposited Successfully.")
+            data = processCheck.getCheckInfo(checkTransaction.front.path)
+
+            if all(value != '' for value in data.values()):
+                senderID = uuid.UUID(data['sender_account'])
+                sender = Accounts.objects.get(id=senderID)
+
+                if float(data['numerical_amount']) == float(amt):
+                    if sender.balance >= amt:
+                        transaction = Transactions.objects.create(destination=dest, source=sender, amount=amt)
+                        checkTransaction.transaction = transaction
+
+                        sender.balance -= amt
+                        dest.balance += amt
+
+                        sender.save()
+                        dest.save()
+                        checkTransaction.save()
+
+                        messages.success(request, "Check deposited successfully.")
+                    else: 
+                        checkTransaction.delete()
+                        messages.error(request, "Source account has insufficient funds")
+
+                else:
+                    checkTransaction.delete()
+                    messages.error(request, "Check amount does not match listed amount")
+            else:
+                checkTransaction.delete()
+                messages.error(request, "Could not read check")
+
             return redirect("confirm")
-            pass
 
     form = UploadCheckForm()
     form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user)
@@ -110,7 +138,7 @@ def accounts_view(request):
                 account.save()
                 messages.success(request, "Account opened successfully.")
                 return redirect("confirm")
-        return redirect("accounts_view");
+        return redirect("accounts_view")
 
     form = addAccountForm()
     accounts = Accounts.objects.filter(user_id=request.user)

@@ -19,7 +19,7 @@ class Users(AbstractUser):
 class Accounts(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user_id = models.ForeignKey(Users, on_delete=models.CASCADE, null=False)
-    balance = models.IntegerField(default=0, null=False)
+    balance = models.DecimalField(decimal_places=2, max_digits=50, default=0, null=False)
     date_opened = models.DateField(auto_now_add = True, null=False)
     account_type = models.CharField(max_length=50, null=False)
 
