@@ -75,7 +75,15 @@ def deposit_view(request):
     return render(request, 'deposit_view.html', {"form": form})
 
 def user_settings(request):
-    return render(request, 'user_settings.html')
+    if request.method == 'POST':
+        form = UserSettingsForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your account has been updated.')
+            return redirect('user_settings')
+    else:
+        form = UserSettingsForm(instance=request.user)
+    return render(request, 'user_settings.html', {'form': form})
 
 def transaction_history(request):
     return render(request, 'transaction_history.html')
