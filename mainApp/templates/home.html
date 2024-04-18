@@ -30,8 +30,11 @@
                 {{ form.password.label_tag }}
                 {{ form.password }}
               </div>
-
+              {% if error_message %}
+                <p>{{ error_message }}</p>
+              {% endif %}
               <button type="submit" class="btn btn-secondary mb-4">Submit</button>
+              <a href="{% url 'reset_password' %}" class="d-block mb-4">Forgot Password?</a>
               <a href="{% url 'register_view' %}" class="d-block mb-4">Don't have an account?</a>
             </form>
 
