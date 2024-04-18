@@ -188,7 +188,7 @@ def accounts_view(request):
                 account.save()
                 messages.success(request, "Account opened successfully.")
                 return redirect("confirm")
-        return redirect("accounts_view");
+        return redirect("accounts_view")
 
     form = addAccountForm()
     accounts = Accounts.objects.filter(user_id=request.user)
@@ -206,6 +206,7 @@ def confirm(request):
 
 @otp_required
 def transfer_funds(request):
+    
     return render(request, 'transfer_funds.html')
 
 def atm_login(request):
