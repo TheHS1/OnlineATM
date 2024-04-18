@@ -206,8 +206,29 @@ def confirm(request):
 
 @otp_required
 def transfer_funds(request):
-    
-    return render(request, 'transfer_funds.html')
+    if request.method == "POST":
+        form = TansferFundsForm(request.POST)
+        form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user)
+        form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
+        if form.is_valid():
+            srce = form.cleaned_data["account1"] # account money taken from
+            dest = form.cleaned_data["account2"] # account getting money
+            amt = form.cleaned_data["amount"]
+
+            account1 = form.fields['account1'].queryset
+            account2 = form.fields['account2'].queryset
+
+            account1
+
+            transaction = Transactions.objects.create(destination=dest, source=srce, amount=amt)
+            messages.success(request, "Funds Transfered Successfully.")
+            return redirect("confirm")
+            pass
+
+    form = TansferFundsForm()
+    form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user)
+    form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
+    return render(request, 'transfer_funds.html', {"form": form})
 
 def atm_login(request):
     if request.method == "POST":

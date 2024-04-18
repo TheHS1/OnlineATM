@@ -38,6 +38,11 @@ class UploadCheckForm(ModelForm):
         model = checkTransactions
         fields = ["front"]
 
+class TansferFundsForm(forms.Form):
+    account1 = forms.ModelChoiceField(queryset=None)
+    account2 = forms.ModelChoiceField(queryset=None)
+    amount = forms.DecimalField(decimal_places=2, widget=forms.NumberInput(attrs={'class': 'form-control', 'id': 'inputAmount', 'placeholder': '0.00'}))
+
 class ResetForm(forms.Form):
     email = forms.EmailField(label='Email address', widget=forms.EmailInput(attrs={'class': 'form-control', 'id': 'email', 'aria-describedby': 'emailHelp'}))
     pin = forms.CharField(label='Pin', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'pin'}))
