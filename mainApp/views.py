@@ -214,16 +214,20 @@ def transfer_funds(request):
             srce = form.cleaned_data["account1"] # account money taken from
             dest = form.cleaned_data["account2"] # account getting money
             amt = form.cleaned_data["amount"]
+            if amt < 0:
+                messages.error(request, "Invalid input")
+            elif srce.balance >= amt:
+                srce.balance -= amt;
+                dest.balance += amt;
+                srce.save();
+                dest.save();
+                transaction = Transactions.objects.create(destination=dest, source=srce, amount=amt)
+                messages.success(request, "Funds Transfered Successfully.")
+            else:
+                messages.error(request, "Insufficient funds")
 
-            account1 = form.fields['account1'].queryset
-            account2 = form.fields['account2'].queryset
 
-            account1
-
-            transaction = Transactions.objects.create(destination=dest, source=srce, amount=amt)
-            messages.success(request, "Funds Transfered Successfully.")
             return redirect("confirm")
-            pass
 
     form = TansferFundsForm()
     form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user)
