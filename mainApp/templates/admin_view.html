@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    #full-height-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+</style>
+
+<div class="container" id="full-height-container">
+
+    <div class="header text-center">
+      <h1>Admin Dashboard</h1>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 g-4 justify-content-center">
+      <div class="col">
+        <a href="{% url 'admin_transaction_history' %}" class="text-decoration-none">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">Transaction Histories</h5>
+              <p class="card-text">View all transaction histories.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col">
+        <a href="{% url 'bank_reports' %}" class="text-decoration-none">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">Bank Reports</h5>
+              <p class="card-text">View reports on accounts opened, closed, etc.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col">
+        <a href="{% url 'check_verification' %}" class="text-decoration-none">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5 class="card-title">Check Verification</h5>
+              <p class="card-text">Verify checks for authenticity and validity.</p>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+</div>
+
+{% endblock %}

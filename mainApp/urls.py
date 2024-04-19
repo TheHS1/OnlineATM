@@ -5,6 +5,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('confirmation/', views.confirm, name='confirm'),
     path('customer_view/', views.customer_view, name='customer_view'),
+    path('admin_view/', views.admin_view, name='admin_view'),
     path('deposit_view/', views.deposit_view, name='deposit_view'),
     path('user_settings/', views.user_settings, name='user_settings'),
     path('transaction_history/', views.transaction_history, name='transaction_history'),

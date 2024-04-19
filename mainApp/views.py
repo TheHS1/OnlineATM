@@ -19,7 +19,10 @@ def home(request):
             
             if user is not None:
                 login(request, user)
-                return redirect('customer_view')
+                if user.is_superuser:
+                    return redirect('admin_view')
+                else:
+                    return redirect('customer_view')
             else:
                 error_message = "Invalid username or password."
                 return render(request, 'home.html', {'form': form, 'error_message': error_message})
@@ -107,8 +110,9 @@ def confirm(request):
 def transfer_funds(request):
     return render(request, 'transfer_funds.html')
 
-
-
+def admin_view(request):
+    if request.user.is_superuser:
+        return render(request, 'admin_view.html')
 
 
     
