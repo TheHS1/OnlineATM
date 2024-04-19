@@ -14,7 +14,7 @@ urlpatterns = [
     path('register_view/', views.register_view, name='register_view'),
     path('reset_password/', views.reset_password, name='reset_password'),
     path('atm_login/', views.atm_login, name='atm_login'),
-    path('ATM.html/', views.atm_page, name='ATM.html'),
+    path('atm_login/ATM.html', views.atm_page, name='ATM.html'),
     path('logout_view', views.logout_view, name='logout_view'),
 ]
 

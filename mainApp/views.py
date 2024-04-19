@@ -294,6 +294,9 @@ def atm_login(request):
 def atm_page(request):
     return render(request, 'ATM.html')
 
+def withdrawal(request):
+    return render(request, 'atm_login.html')
+
 #def withdrawal(request):
     if request.method == "POST":
         account_id = request.POST.get('account')
