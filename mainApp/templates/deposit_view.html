@@ -1,34 +1,46 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<body>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-auto"> 
+            <h1 class="display-1 text-center mb-5">Deposit Funds</h1>
+            <form enctype="multipart/form-data" method="POST" action="" onsubmit="return confirm('All information confirmed & ready to submit?');" class="g-3">
+                {% csrf_token %}
+                <div class="mb-3 text-center">
+                    <label for="{{ form.front.id_for_label }}" class="form-label d-block"><b>Upload check:</b></label>
+                    {{ form.front }}
+                    <img id="output" class="img-thumbnail mt-2 d-block mx-auto" style="max-width: 500px; max-height: 300px; display: none;"/> 
+                </div>     
 
-    <h1 class="display-1">Deposit Funds</h1>
-    <hr/>
-    <form class="ms-4" enctype="multipart/form-data" method="POST" action="" onsubmit="return confirm('All information confirmed & ready to submit?');">
-        {% csrf_token %}
-        <div class="mb-4 col-7" onchange="loadFile(event)">
-            <b>Upload check:</b>
-            {{ form.front }}
-            <img class="rounded" style="max-width: 500px; max-height: 300px" id="output"/>
-            <script>
-                var loadFile = function(event) {
-                    var output = document.getElementById('output');
-                    output.src = URL.createObjectURL(event.target.files[0]);
-                };
-            </script>       
-        </div>     
+                <div class="mb-3 text-center">
+                    <label for="{{ form.account.id_for_label }}" class="form-label d-block"><b>Deposit to:</b></label>
+                    {{ form.account }}
+                </div>
 
-        <div class="mb-4 col-2"> 
-            <b>Deposit to:</b>
-            {{ form.account }}
+                <div class="mb-3 text-center">
+                    <label for="{{ form.amount.id_for_label }}" class="form-label d-block"><b>Enter amount:</b></label>
+                    {{ form.amount }}
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-secondary">Submit</button>
+                </div>
+            </form>
         </div>
+    </div>
+</div>
 
-        <div class="mb-4 col-2"> 
-            <b>Enter amount:</b>
-            {{ form.amount }}
-        </div>
-        <button type="submit" class="btn btn-secondary">Submit</button>
-    </form>
-</body>
+<script>
+    var loadFile = function(event) {
+        var output = document.getElementById('output');
+        output.style.display = 'block'; 
+        output.src = URL.createObjectURL(event.target.files[0]);
+        output.onload = function() {
+            URL.revokeObjectURL(output.src) 
+        }
+    };
+    document.getElementById("{{ form.front.id_for_label }}").addEventListener('change', loadFile);
+</script>
+
 {% endblock %}
