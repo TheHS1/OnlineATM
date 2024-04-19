@@ -8,6 +8,7 @@ from django_otp.decorators import otp_required
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from .forms import *
 from .models import *
+import uuid
 
 from scripts import processCheck
 
@@ -148,12 +149,39 @@ def deposit_view(request):
         if form.is_valid():
             dest = form.cleaned_data["account"]
             amt = form.cleaned_data["amount"]
+
             checkTransaction = form.save()
-            processCheck.getCheckInfo(checkTransaction.front.path)
-            transaction = Transactions.objects.create(destination=dest, source=dest, amount=amt)
-            messages.success(request, "Check deposited Successfully.")
+            data = processCheck.getCheckInfo(checkTransaction.front.path)
+
+            if all(value != '' for value in data.values()):
+                senderID = uuid.UUID(data['sender_account'])
+                sender = Accounts.objects.get(id=senderID)
+
+                if float(data['numerical_amount']) == float(amt):
+                    if sender.balance >= amt:
+                        transaction = Transactions.objects.create(destination=dest, source=sender, amount=amt)
+                        checkTransaction.transaction = transaction
+
+                        sender.balance -= amt
+                        dest.balance += amt
+
+                        sender.save()
+                        dest.save()
+                        checkTransaction.save()
+
+                        messages.success(request, "Check deposited successfully.")
+                    else: 
+                        checkTransaction.delete()
+                        messages.error(request, "Source account has insufficient funds")
+
+                else:
+                    checkTransaction.delete()
+                    messages.error(request, "Check amount does not match listed amount")
+            else:
+                checkTransaction.delete()
+                messages.error(request, "Could not read check")
+
             return redirect("confirm")
-            pass
 
     form = UploadCheckForm()
     form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user)

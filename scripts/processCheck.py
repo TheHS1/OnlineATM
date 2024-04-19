@@ -23,18 +23,26 @@ def getCheckInfo(path):
                     [int(height*0.28), int(width*0.15)], [int(height*0.53), int(width*0.75)]
                 ], # Recipient
                 [
-                    [int(height*0.73), int(width*0.14)], [int(width*0.45), int(height*0.88)]
-                ]  # Memo
+                    [int(height*0.73), int(width*0.14)], [int(height*0.88), int(width*0.45)]
+                ],  # Memo
+                [
+                    [int(height*0.88), int(width*0.05)], [int(height), int(width*0.5)]
+                ]  # sender_account
              ]
 
-    labels = ["Name and Address:", 
-              "Date:", 
-              "Numerical Amount:", 
-              "Spelled out Amount:", 
-              "Recipient:", 
-              "Memo:"
+    labels = ["sender_info", 
+              "date", 
+              "numerical_amount", 
+              "spelled_amount", 
+              "recipient", 
+              "memo",
+              "sender_account"
              ]
+
+    data = {}
 
     for i, bound in enumerate(bounds):
         text = reader.readtext(img[bound[0][0]:bound[1][0], bound[0][1]:bound[1][1]])
-        print(labels[i], ' '.join(line[1] for line in text))
+        data[labels[i]] = ' '.join(line[1] for line in text)
+
+    return data
