@@ -13,5 +13,8 @@ urlpatterns = [
     path('transfer_funds/', views.transfer_funds, name='transfer_funds'),
     path('register_view/', views.register_view, name='register_view'),
     path('reset_password/', views.reset_password, name='reset_password'),
+    path('admin_transaction_history/', views.admin_transaction_history, name='admin_transaction_history'),
+    path('bank_reports/', views.bank_reports, name='bank_reports'),
+    path('check_verification/', views.check_verification, name='check_verification'),
 ]
 
