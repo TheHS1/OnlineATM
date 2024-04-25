@@ -138,7 +138,6 @@ def customer_view(request):
 @otp_required
 def logout_view(request):
     logout(request)
-    messages.success(request, "Sucessfully logged out")
     return redirect('home')
 
 @otp_required
@@ -194,7 +193,7 @@ def user_settings(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Your account has been updated.')
-            return redirect('user_settings')
+            return redirect('confirm')
     else:
         form = UserSettingsForm(instance=request.user)
     return render(request, 'user_settings.html', {'form': form})
