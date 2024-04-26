@@ -190,14 +190,62 @@ def deposit_view(request):
 @otp_required
 def user_settings(request):
     if request.method == 'POST':
-        form = UserSettingsForm(request.POST, instance=request.user)
+        form = EditProfileForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, 'Your account has been updated.')
             return redirect('user_settings')
     else:
-        form = UserSettingsForm(instance=request.user)
+        form = EditProfileForm(instance=request.user)
     return render(request, 'user_settings.html', {'form': form})
+
+def user_settings_password(request):
+    if request.method == "POST":
+        form = ShortResetForm(request.POST)
+        if (form.is_valid()) and (form.cleaned_data['password2'] == form.cleaned_data['password3']):
+            emailLogin = form.cleaned_data['email']
+            passwordLogin = form.cleaned_data['password1']
+            pinLogin = form.cleaned_data['pin']
+            user = authenticate(request, email=emailLogin, password=passwordLogin, pin=pinLogin)
+        
+            if (user is not None):
+                user.set_password(form.cleaned_data["password2"])
+                user.save()
+            else:
+                error_message = "Account does not exist."
+                return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
+            return redirect('home')
+        else:
+            print(form.errors)
+            error_message = "Invalid email, password, or pin"
+            return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
+    else:
+        form = ShortResetForm()
+    return render(request, 'user_settings_password.html', {"form": form})
+
+def user_settings_pin(request):
+    if request.method == "POST":
+        form = PinResetForm(request.POST)
+        if (form.is_valid()) and (form.cleaned_data['password2'] == form.cleaned_data['password3']):
+            emailLogin = form.cleaned_data['email']
+            passwordLogin = form.cleaned_data['password1']
+            pinLogin = form.cleaned_data['pin']
+            user = authenticate(request, email=emailLogin, password=passwordLogin, pin=pinLogin)
+        
+            if (user is not None):
+                user.set_password(form.cleaned_data["password2"])
+                user.save()
+            else:
+                error_message = "Account does not exist."
+                return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
+            return redirect('home')
+        else:
+            print(form.errors)
+            error_message = "Invalid email, password, or pin"
+            return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
+    else:
+        form = PinResetForm()
+    return render(request, 'user_settings_pin.html', {"form": form})
 
 @otp_required
 def transaction_history(request):
