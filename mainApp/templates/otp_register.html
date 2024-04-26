@@ -1,17 +1,19 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-<div class="container">
-  <div class="row justify-content-center">
-    <div class="col-lg-8">
-        {% if url %}
-        Google Authenticator link: <a href="{{ url }}">{{ url }}</a>
-        Or scan the QR code: <img src="{{ qrcode }}">
-        {% endif %}
+<div class="container py-5">
+  <div class="row justify-content-center align-items-center">
+    <div class="col-md-8 text-center">
+      {% if url %}
+      <h2 class="mb-4">Google Authenticator Setup</h2>
+      <p>
+        Scan the QR code with Google Authenticator or use the following link:
+        <a href="{{ url }}" class="d-block text-break">{{ url }}</a>
+      </p>
+      <img src="{{ qrcode }}" alt="QR Code" class="img-fluid img-thumbnail mx-auto my-4" style="max-width: 200px;"/>
+      <a href="/" class="btn btn-link d-block mt-4">Return to login</a>
+      {% endif %}
     </div>
-    <a href="/">Return to login</a>
   </div>
 </div>
-
 {% endblock %}
