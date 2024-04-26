@@ -242,6 +242,7 @@ def confirm(request):
     return render(request, 'confirmation.html')
 
 @otp_required
+@otp_required
 def transfer_funds(request):
     if request.method == "POST":
         form = TansferFundsForm(request.POST)
@@ -262,7 +263,14 @@ def transfer_funds(request):
                 messages.success(request, "Funds Transfered Successfully.")
             else:
                 messages.error(request, "Insufficient funds")
-    return render(request, 'transfer_funds.html')
+
+
+            return redirect("confirm")
+
+    form = TansferFundsForm()
+    form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user)
+    form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
+    return render(request, 'transfer_funds.html', {"form": form})
 
 def admin_view(request):
     if request.user.is_superuser:
