@@ -38,11 +38,10 @@ class EditProfileForm(ModelForm):
     last_name = forms.CharField(label='Last Name', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'last_name'}))
     phone_number = forms.CharField(label='Phone Number', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'phone_number'}))
     address = forms.CharField(label='Address', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'address'}))
-    pin = forms.CharField(label='Pin', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'pin'}))
 
     class Meta:
         model = Users
-        fields = ['first_name', 'last_name', 'email', 'phone_number', 'pin']
+        fields = ['first_name', 'last_name', 'email', 'phone_number', 'address']
 
 class ResetForm(forms.Form):
     email = forms.EmailField(label='Email address', widget=forms.EmailInput(attrs={'class': 'form-control', 'id': 'email', 'aria-describedby': 'emailHelp'}))

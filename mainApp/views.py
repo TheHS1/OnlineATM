@@ -118,18 +118,15 @@ def deposit_view(request):
     return render(request, 'deposit_view.html', {"form": form})
 
 def user_settings(request):
-    if request.method == "POST":
-        form = EditProfileForm(request.POST)
-        if profile_form.is_valid():
-            user = form.save(commit=False)
-            user.save()
-            return redirect('home')
-        else:
-            error_message = "Invalid credentials."
-            return render(request, 'register_view.html', {'form': form, 'error_message': error_message})
+    if request.method == 'POST':
+        form = EditProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your account has been updated.')
+            return redirect('user_settings')
     else:
-        form = EditProfileForm()
-    return render(request, 'user_settings.html', {"form": form})
+        form = EditProfileForm(instance=request.user)
+    return render(request, 'user_settings.html', {'form': form})
 
 def user_settings_password(request):
     if request.method == "POST":
