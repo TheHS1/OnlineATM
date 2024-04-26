@@ -48,7 +48,6 @@ def home(request):
             if form.is_valid():
                 emailLogin = form.cleaned_data['email']
                 passwordLogin = form.cleaned_data['password']
-
                 user = authenticate(request, email=emailLogin, password=passwordLogin)
                 
                 if user is not None:
@@ -67,7 +66,10 @@ def home(request):
     else:
         form = LoginForm()
         if request.user.is_verified():
-            return redirect('customer_view')
+            if user.is_superuser:
+                return redirect('admin_view')
+            else:
+                return redirect('customer_view')
     return render(request, 'home.html', {'form': form})
 
 @login_required
@@ -260,9 +262,20 @@ def transfer_funds(request):
                 messages.success(request, "Funds Transfered Successfully.")
             else:
                 messages.error(request, "Insufficient funds")
+    return render(request, 'transfer_funds.html')
 
+def admin_view(request):
+    if request.user.is_superuser:
+        return render(request, 'admin_view.html')
+    
+def admin_transaction_history(request):
+    return render(request, 'admin_transaction_history.html')
 
-            return redirect("confirm")
+def bank_reports(request):
+    return render(request, 'bank_reports.html')
+
+def check_verification(request):
+    return render(request, 'check_verification.html')
 
     form = TansferFundsForm()
     form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user)
