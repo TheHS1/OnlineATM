@@ -36,7 +36,10 @@ def home(request):
                             device.confirmed = True;
                             device.save()
                         verifyOTP(request, device)
-                        return redirect('customer_view')
+                        if request.user.is_superuser:
+                            return redirect('admin_view')
+                        else:
+                            return redirect('customer_view')
                 error_message = "Incorrect OTP code"
                 form = OtpForm()
                 return render(request, 'home.html', {'form': form, 'title': 'Verify your identity', 'error_message': error_message})
@@ -66,7 +69,7 @@ def home(request):
     else:
         form = LoginForm()
         if request.user.is_verified():
-            if user.is_superuser:
+            if request.user.is_superuser:
                 return redirect('admin_view')
             else:
                 return redirect('customer_view')
@@ -272,6 +275,7 @@ def transfer_funds(request):
     form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
     return render(request, 'transfer_funds.html', {"form": form})
 
+@otp_required
 def admin_view(request):
     if request.user.is_superuser:
         return render(request, 'admin_view.html')
