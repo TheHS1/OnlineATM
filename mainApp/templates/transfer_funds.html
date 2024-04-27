@@ -1,23 +1,29 @@
 {% extends 'base.html' %}
 {% block content %}
-<body>
-    <h1 class="display-1">Transfer Funds</h1>
-    <hr/>
-    <form class="ms-4" enctype="multipart/form-data" method="POST" action="" onsubmit="return confirm('All information confirmed & ready to submit?');">
-        {% csrf_token %}
-        <div class="mb-4 col-2"> 
-            <b>Withdraw from:</b>
-            {{ form.account1 }}
+<div class="container py-5"> 
+    <div class="row justify-content-center"> 
+        <div class="col-md-6"> 
+            <h1 class="display-1 text-center mb-5">Transfer Funds</h1> 
+
+            <form method="POST" action="" onsubmit="return confirm('All information confirmed & ready to submit?');" class="text-center">
+                {% csrf_token %}
+                <div class="mb-3"> 
+                    <label for="{{ form.account1.id_for_label }}" class="form-label d-block"><b>Withdraw from:</b></label>
+                    {{ form.account1 }}
+                </div>
+                <div class="mb-3"> 
+                    <label for="{{ form.account2.id_for_label }}" class="form-label d-block"><b>Deposit to:</b></label>
+                    {{ form.account2 }}
+                </div>
+
+                <div class="mb-3 col-6 mx-auto"> 
+                    <label for="{{ form.amount.id_for_label }}" class="form-label d-block"><b>Enter amount:</b></label>
+                    {{ form.amount }} 
+                </div>
+
+                <button type="submit" class="btn btn-secondary">Submit</button> 
+            </form>
         </div>
-        <div class="mb-4 col-2"> 
-            <b>Deposit to:</b>
-            {{ form.account2 }}
-        </div>
-        <div class="mb-4 col-2"> 
-            <b>Enter amount:</b>
-            {{ form.amount }}
-        </div>
-        <button type="submit" class="btn btn-secondary">Submit</button>
-    </form>
-</body>
+    </div>
+</div>
 {% endblock %}
