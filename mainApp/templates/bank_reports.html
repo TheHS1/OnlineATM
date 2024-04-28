@@ -1,1 +1,25 @@
 {% extends 'base_admin.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <h1>Bank Reports</h1>
+    <hr>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">
+                {{ form.start_date.label }}
+                {{ form.start_date }}
+            </div>
+            <div class="col-md-6">
+                {{ form.end_date.label }}
+                {{ form.end_date }}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-secondary mt-3">Generate Report</button>
+    </form>    
+</div>
+
+{% endblock %}

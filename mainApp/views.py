@@ -336,7 +336,9 @@ def admin_transaction_history(request):
     return render(request, 'admin_transaction_history.html')
 
 def bank_reports(request):
-    return render(request, 'bank_reports.html')
+    form = ReportForm()
+    
+    return render(request, 'bank_reports.html', {'form': form})
 
 def check_verification(request):
     return render(request, 'check_verification.html')

@@ -4,6 +4,7 @@ from .models import Users
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import ModelForm
 from .models import checkTransactions
+from datetime import date
 
 accountOptions = (('Checkings', 'Checkings'), 
                   ('Savings', 'Savings'), ('Business', 'Business'))
@@ -63,3 +64,7 @@ class UserSettingsForm(forms.ModelForm):
     class Meta:
         model = Users
         fields = ['first_name', 'last_name', 'email', 'phone_number', 'address']
+
+class ReportForm(forms.Form):
+    start_date = forms.DateField(label='Start Date', widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
+    end_date = forms.DateField(label='End Date', widget=forms.DateInput( attrs={'type': 'date', 'class': 'form-control'}))
