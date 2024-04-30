@@ -104,31 +104,54 @@ def register_view(request):
 
 def reset_password(request):
     if request.method == "POST":
-        form = ResetForm(request.POST)
-        if (form.is_valid()) and (form.cleaned_data['password2'] == form.cleaned_data['password3']):
-            emailLogin = form.cleaned_data['email']
-            passwordLogin = form.cleaned_data['password1']
-            pinLogin = form.cleaned_data['pin']
-            user = authenticate(request, email=emailLogin, password=passwordLogin, pin=pinLogin)
-            
-            if (user is not None):
-                user.set_password(form.cleaned_data["password2"])
-                user.save()
-            else:
-                error_message = "Account does not exist."
-                return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
-            return redirect('home')
-        
-        elif ((form.cleaned_data['password2'] != form.cleaned_data['password3'])):
-            error_message = "Passwords do not match"
-            return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
-        
+        devices = devices_for_user(request.user, confirmed=None)
+
+        # check if otp form was submitted or normal login form
+        if ('verify' in request.POST):
+            form = OtpForm(request.POST)
+
+            # check if submitted token matches device token
+            if form.is_valid():
+                token = form.cleaned_data['otp_token']
+                for device in devices:
+                    if isinstance(device, TOTPDevice) and device.verify_token(token):
+                        if device.confirmed == False:
+                            device.confirmed = True;
+                            device.save()
+                        verifyOTP(request, device)
+                        return redirect('reset_password')
+                error_message = "Incorrect OTP code"
+                form = OtpForm()
+                return render(request, 'reset_password.html', {'form': form, 'title': 'Verify your identity', 'error_message': error_message})
+
+                
         else:
-            error_message = "Invalid email or pin"
-            return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
+            hasDevice = False
+            form = ResetForm(request.POST)
+
+            # login user if valid
+            if form.is_valid() and form.cleaned_data["password2"] == form.cleaned_data["password3"]:
+                emailLogin = form.cleaned_data['email']
+                user = authenticate(request, email=emailLogin)
+                
+                if user is not None:
+                    # Check if the user has a registered otp device
+                    for device in devices:
+                        if isinstance(device, TOTPDevice):
+                            hasDevice = True
+                    if hasDevice:
+                        form = OtpForm()
+                        user.set_password(form.cleaned_data["password2"])
+                        user.save()
+                        return render(request, 'reset_password.html', {'form': form, 'title': 'Verify your identity'})
+                    return redirect(otp_register)
+                else:
+                    error_message = "Invalid username or password."
+                return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})     
     else:
         form = ResetForm()
-
+        if request.user.is_verified():
+            return redirect('reset_password')
     return render(request, 'reset_password.html', {'form': form})
 
 @otp_required
