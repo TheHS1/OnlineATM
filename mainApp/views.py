@@ -8,7 +8,6 @@ from django_otp.decorators import otp_required
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from .forms import *
 from .models import *
-import uuid
 from django.contrib import messages
 
 from scripts import processCheck
@@ -159,7 +158,7 @@ def deposit_view(request):
             data = processCheck.getCheckInfo(checkTransaction.front.path)
 
             if all(value != '' for value in data.values()):
-                senderID = uuid.UUID(data['sender_account'])
+                senderID = int(data['sender_account'])
                 sender = Accounts.objects.get(id=senderID)
 
                 if float(data['numerical_amount']) == float(amt):
