@@ -123,8 +123,6 @@ def reset_password(request):
                 error_message = "Incorrect OTP code"
                 form = OtpForm()
                 return render(request, 'reset_password.html', {'form': form, 'title': 'Verify your identity', 'error_message': error_message})
-
-                
         else:
             hasDevice = False
             form = ResetForm(request.POST)
@@ -141,8 +139,6 @@ def reset_password(request):
                             hasDevice = True
                     if hasDevice:
                         form = OtpForm()
-                        user.set_password(form.cleaned_data["password2"])
-                        user.save()
                         return render(request, 'reset_password.html', {'form': form, 'title': 'Verify your identity'})
                     return redirect(otp_register)
                 else:
