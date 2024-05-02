@@ -158,13 +158,27 @@ def deposit_view(request):
             data = processCheck.getCheckInfo(checkTransaction.front.path)
 
             if all(value != '' for value in data.values()):
-                senderID = int(data['sender_account'])
-                sender = Accounts.objects.get(id=senderID)
+                sender_id = int(data['sender_account'])
+                sender_info = data['sender_info']
+                recorded_date = data['date']
+                spelled_amount = data['spelled_amount']
+                recipient = data['recipient']
+                memo = data['memo']
+                sender = Accounts.objects.get(id=sender_id)
 
                 if float(data['numerical_amount']) == float(amt):
                     if sender.balance >= amt:
                         transaction = Transactions.objects.create(destination=dest, source=sender, amount=amt)
+    # sender_info = models.CharField(max_length=100)
+    # writeDate = models.TimeField(auto_now_add=False)
+    # numericalAmount = models.CharField(max_length=100)
+    # recipientName = models.CharField(max_length=50)
+    # memo = models.CharField(max_length=100)
                         checkTransaction.transaction = transaction
+                        checkTransaction.sender_info = sender_info
+                        checkTransaction.spelled_amount = spelled_amount
+                        checkTransaction.recipient_name = recipient
+                        checkTransaction.memo = memo
 
                         sender.balance -= amt
                         dest.balance += amt

@@ -44,6 +44,10 @@ class Transactions(models.Model):
     timestamp = models.TimeField(auto_now_add=True)
 
 class checkTransactions(models.Model):
-    transaction = models.ForeignKey(Transactions, on_delete = models.CASCADE, null=True, related_name='transaction')
+    transaction = models.ForeignKey(Transactions, on_delete = models.CASCADE, related_name='transaction', null = True)
     front = models.ImageField(upload_to ='check/')
     back = models.ImageField(upload_to ='check/')
+    sender_info = models.CharField(max_length=100, null=False)
+    spelled_amount = models.CharField(max_length=100, null=False)
+    recipient_name = models.CharField(max_length=50, null=False)
+    memo = models.CharField(max_length=100, null=False)
