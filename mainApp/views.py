@@ -36,7 +36,10 @@ def home(request):
                             device.confirmed = True;
                             device.save()
                         verifyOTP(request, device)
-                        return redirect('customer_view')
+                        if request.user.is_superuser:
+                            return redirect('admin_view')
+                        else:
+                            return redirect('customer_view')
                 error_message = "Incorrect OTP code"
                 form = OtpForm()
                 return render(request, 'home.html', {'form': form, 'title': 'Verify your identity', 'error_message': error_message})
@@ -48,7 +51,6 @@ def home(request):
             if form.is_valid():
                 emailLogin = form.cleaned_data['email']
                 passwordLogin = form.cleaned_data['password']
-
                 user = authenticate(request, email=emailLogin, password=passwordLogin)
                 
                 if user is not None:
@@ -67,7 +69,10 @@ def home(request):
     else:
         form = LoginForm()
         if request.user.is_verified():
-            return redirect('customer_view')
+            if request.user.is_superuser:
+                return redirect('admin_view')
+            else:
+                return redirect('customer_view')
     return render(request, 'home.html', {'form': form})
 
 @login_required
@@ -389,3 +394,16 @@ def withdrawal(request):
     accounts = request.user.accounts.all()  # Assuming the user's accounts are related to the user model
 
     return render(request, 'withdrawal.html', {'accounts': accounts})
+
+def admin_view(request):
+    if request.user.is_superuser:
+        return render(request, 'admin_view.html')
+    
+def admin_transaction_history(request):
+    return render(request, 'admin_transaction_history.html')
+
+def bank_reports(request):
+    return render(request, 'bank_reports.html')
+
+def check_verification(request):
+    return render(request, 'check_verification.html')
