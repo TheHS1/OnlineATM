@@ -13,3 +13,6 @@ class RegisterForm(ModelForm):
         model = Users
         fields = ['first_name', 'last_name', 'email', 'pin', 'password', 'address', 'phone_number']
 
+class ATMLoginForm(forms.Form):
+    account_number = forms.CharField(label='Account Number', max_length=100, widget=forms.TextInput(attrs={'required': True}))
+    pin = forms.CharField(label='PIN', widget=forms.PasswordInput(attrs={'required': True}))

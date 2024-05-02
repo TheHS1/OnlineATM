@@ -12,7 +12,8 @@ urlpatterns = [
     path('register_view/', views.register_view, name='register_view'),
     path('atm_login/', views.atm_login, name='atm_login'),
     path('atm_login/ATM.html', views.atm_page, name='ATM.html'),
-    
+    path('withdraw_success/', views.withdraw_success, name='withdraw_success'),
+    path('accounts/login/', views.atm_login, name='accounts_login_redirect'),
 
 
 ]
