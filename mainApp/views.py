@@ -9,6 +9,7 @@ from django_otp.plugins.otp_totp.models import TOTPDevice
 from .forms import *
 from .models import *
 import uuid
+from django.contrib import messages
 
 from scripts import processCheck
 
@@ -36,7 +37,10 @@ def home(request):
                             device.confirmed = True;
                             device.save()
                         verifyOTP(request, device)
-                        return redirect('customer_view')
+                        if request.user.is_superuser:
+                            return redirect('admin_view')
+                        else:
+                            return redirect('customer_view')
                 error_message = "Incorrect OTP code"
                 form = OtpForm()
                 return render(request, 'home.html', {'form': form, 'title': 'Verify your identity', 'error_message': error_message})
@@ -48,7 +52,6 @@ def home(request):
             if form.is_valid():
                 emailLogin = form.cleaned_data['email']
                 passwordLogin = form.cleaned_data['password']
-
                 user = authenticate(request, email=emailLogin, password=passwordLogin)
                 
                 if user is not None:
@@ -67,7 +70,10 @@ def home(request):
     else:
         form = LoginForm()
         if request.user.is_verified():
-            return redirect('customer_view')
+            if request.user.is_superuser:
+                return redirect('admin_view')
+            else:
+                return redirect('customer_view')
     return render(request, 'home.html', {'form': form})
 
 @login_required
@@ -138,7 +144,6 @@ def customer_view(request):
 @otp_required
 def logout_view(request):
     logout(request)
-    messages.success(request, "Sucessfully logged out")
     return redirect('home')
 
 @otp_required
@@ -287,6 +292,7 @@ def confirm(request):
     return render(request, 'confirmation.html')
 
 @otp_required
+@otp_required
 def transfer_funds(request):
     if request.method == "POST":
         form = TransferFundsForm(request.POST)
@@ -316,6 +322,25 @@ def transfer_funds(request):
     form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
     return render(request, 'transfer_funds.html', {"form": form})
 
+@otp_required
+def admin_view(request):
+    if request.user.is_superuser:
+        return render(request, 'admin_view.html')
+    
+def admin_transaction_history(request):
+    return render(request, 'admin_transaction_history.html')
+
+def bank_reports(request):
+    return render(request, 'bank_reports.html')
+
+def check_verification(request):
+    return render(request, 'check_verification.html')
+
+    form = TansferFundsForm()
+    form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user)
+    form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
+    return render(request, 'transfer_funds.html', {"form": form})
+
 def atm_login(request):
     if request.method == "POST":
         form = LoginForm(request.POST)
@@ -336,35 +361,44 @@ def atm_login(request):
     
     return render(request, 'atm_login.html', {'form': form})
 
-
+@login_required
 def atm_page(request):
-    return render(request, 'ATM.html')
-
-def withdrawal(request):
-    return render(request, 'atm_login.html')
-
-#def withdrawal(request):
     if request.method == "POST":
-        account_id = request.POST.get('account')
-        withdrawal_amount = int(request.POST.get('withdrawal_amount'))
+        if 'withdrawal' in request.POST:
+            account_id = request.POST.get('account')
+            withdrawal_amount = int(request.POST.get('withdrawal_amount'))
 
-        # Retrieve the selected account
-        account = Accounts.objects.get(pk=account_id)
+            try:
+                # Retrieve the selected account
+                account = Accounts.objects.get(pk=account_id)
 
-        # Check if the withdrawal amount exceeds the available balance
-        if withdrawal_amount > account.balance:
-            # Display error message if the withdrawal amount is greater than the available balance
-            messages.error(request, "Insufficient funds. Please enter a lower withdrawal amount.")
-            return redirect('withdrawal')
+                # Check if the withdrawal amount exceeds the available balance
+                if withdrawal_amount > account.balance:
+                    # Display error message if the withdrawal amount is greater than the available balance
+                    messages.error(request, "Insufficient funds. Please enter a lower withdrawal amount.")
+                    return redirect('atm_page')
 
-        # Subtract withdrawal amount from the account balance
-        account.balance -= withdrawal_amount
-        account.save()
+                # Subtract withdrawal amount from the account balance
+                account.balance -= withdrawal_amount
+                account.save()
 
-        # Redirect to a success page or another view
-        return redirect('success_page')
+                # Redirect to a success page
+                return redirect('withdraw_success')
+
+            except Accounts.DoesNotExist:
+                # Handle case where account does not exist
+                messages.error(request, "Selected account does not exist.")
+                return redirect('atm_page')
+            except ValueError:
+                # Handle case where withdrawal amount is not a valid integer
+                messages.error(request, "Invalid withdrawal amount.")
+                return redirect('atm_page')
 
     # Fetch user's accounts to populate the dropdown
     accounts = request.user.accounts.all()  # Assuming the user's accounts are related to the user model
 
     return render(request, 'withdrawal.html', {'accounts': accounts})
+    return render(request, 'ATM.html', {'accounts': accounts})
+
+def withdraw_success(request):
+    return render(request, 'withdraw_success.html')

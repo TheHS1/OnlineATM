@@ -6,8 +6,8 @@
     <title>ATM Login</title>
     <style>
         body {
-            background-color: #1a1a1a;
-            color: #ffffff;
+            background-color: #ffffff; /* White */
+            color: #000000; /* Black */
             font-family: Arial, sans-serif;
             text-align: center;
             margin-top: 50px;
@@ -22,10 +22,10 @@
             align-items: center;
         }
         form {
-            background-color: #333333;
+            background-color: #f0f0f0; /* Light grey */
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2); /* Black shadow */
         }
         label {
             display: block;
@@ -43,8 +43,8 @@
         }
         button[type="submit"] {
             padding: 12px 24px;
-            background-color: #ffd700;
-            color: #000000;
+            background-color: #000000; /* Black */
+            color: #ffffff; /* White */
             border: none;
             border-radius: 5px;
             font-size: 18px;
@@ -52,19 +52,7 @@
             transition: background-color 0.3s ease;
         }
         button[type="submit"]:hover {
-            background-color: #ffdf00; /* Lighter shade of gold on hover */
-        }
-        .customer-images {
-            display: flex;
-            justify-content: center;
-            margin-top: 30px;
-        }
-        .customer-images img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            margin: 0 10px;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            background-color: #333333; /* Darker shade of black on hover */
         }
     </style>
 </head>
@@ -79,11 +67,6 @@
             <input type="password" id="pin" name="pin" required><br>
             <button type="submit">Login</button>
         </form>
-        <div class="customer-images">
-            <img src="happy_customer_1.jpg" alt="Happy Customer 1">
-            <img src="happy_customer_2.jpg" alt="Happy Customer 2">
-            <img src="happy_customer_3.jpg" alt="Happy Customer 3">
-        </div>
     </div>
 </body>
 </html>
