@@ -8,6 +8,8 @@ class Users(AbstractUser):
     address = models.CharField(max_length=200, null=False, default='')
     email = models.EmailField(max_length=100, unique=True, default='')
     pin = models.CharField(max_length=4, default='')
+    date_opened = models.DateField(auto_now_add = True, null=True)
+
     username = None
 
     USERNAME_FIELD = "email"
@@ -15,7 +17,7 @@ class Users(AbstractUser):
 
     def __str__(self):
         return self.first_name + " " + self.last_name
-
+    
 class Accounts(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user_id = models.ForeignKey(Users, on_delete=models.CASCADE, null=False)

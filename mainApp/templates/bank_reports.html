@@ -33,9 +33,24 @@
         </ul>
     </div>
     {% else %}
-    <p>No accounts found within the given date range.</p>
+    <p class="mt-4">No accounts found within the given date range.</p>
     {% endif %}
-    
+
+    {% if users_within_range %}
+    <div class="mt-4">
+        <h2>Customer Accounts Opened within Date Range</h2>
+        <ul class="list-group">
+            {% for user in users_within_range %}
+            <li class="list-group-item">
+                User ID: {{ user.id }} - Name: {{ user.first_name }} {{ user.last_name }} - Email: {{ user.email }} - Phone: {{ user.phone_number }} - Address: {{ user.address }} - Opened: {{ user.date_opened }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <p class="mt-4">No customer accounts found within the given date range.</p>
+    {% endif %}
+
 </div>
 
 {% endblock %}

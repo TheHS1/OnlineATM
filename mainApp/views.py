@@ -338,15 +338,18 @@ def admin_transaction_history(request):
 def bank_reports(request):
     form = ReportForm(request.POST or None)
     accounts_within_range = None
+    users_within_range = None
 
     if request.method == "POST":
         if form.is_valid():
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
+
             accounts_within_range = Accounts.objects.filter(date_opened__gte=start_date, date_opened__lte=end_date)
+            users_within_range = Users.objects.filter(date_opened__gte=start_date, date_opened__lte=end_date)
 
     
-    return render(request, 'bank_reports.html', {'form': form, 'accounts_within_range': accounts_within_range})
+    return render(request, 'bank_reports.html', {'form': form, 'accounts_within_range': accounts_within_range, 'users_within_range': users_within_range})
 
 def check_verification(request):
     return render(request, 'check_verification.html')
