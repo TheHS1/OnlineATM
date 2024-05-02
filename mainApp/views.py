@@ -8,6 +8,7 @@ from django_otp.decorators import otp_required
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from .forms import *
 from .models import *
+from .admin import *
 import uuid
 
 from scripts import processCheck
@@ -22,7 +23,6 @@ from base64 import b64encode
 def home(request):
     if request.method == "POST":
         devices = devices_for_user(request.user, confirmed=None)
-
         # check if otp form was submitted or normal login form
         if ('verify' in request.POST):
             form = OtpForm(request.POST)
@@ -400,7 +400,28 @@ def admin_view(request):
         return render(request, 'admin_view.html')
     
 def admin_transaction_history(request):
-    return render(request, 'admin_transaction_history.html')
+    transactions = Transactions.objects.all()
+    transactions = transactions.order_by('-timestamp')
+    try:
+        if request.method == "POST":
+            transaction_id = request.POST.get('transaction_id')
+            transaction = Transactions.objects.get(id=transaction_id)
+
+            amt = transaction.amount
+            src = transaction.source
+            dst = transaction.destination
+
+            src.balance += amt
+            dst.balance -= amt
+
+            src.save()
+            dst.save()
+
+            transaction.delete()
+    except:
+        pass
+        
+    return render(request, 'admin_transaction_history.html', {'transactions': transactions})
 
 def bank_reports(request):
     return render(request, 'bank_reports.html')
