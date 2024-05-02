@@ -333,10 +333,19 @@ def admin_view(request):
         return render(request, 'admin_view.html')
     
 def admin_transaction_history(request):
-    return render(request, 'admin_transaction_history.html')
+    user_accounts = Accounts.objects.all()
+    transactions = Transactions.objects.all()
+    transactions = transactions.order_by('-timestamp')
+
+    return render(request, 'admin_transaction_history.html', {'transactions': transactions})
 
 def bank_reports(request):
     return render(request, 'bank_reports.html')
 
 def check_verification(request):
-    return render(request, 'check_verification.html')
+    user_accounts = Accounts.objects.all()
+    transactions = Transactions.objects.all()
+    checks = checkTransactions.objects.all()
+    transactions = transactions.order_by('-timestamp')
+
+    return render(request, 'check_verification.html', {'transactions': transactions})
