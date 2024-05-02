@@ -190,59 +190,57 @@ def deposit_view(request):
 @otp_required
 def user_settings(request):
     if request.method == 'POST':
-        form = EditProfileForm(request.POST, instance=request.user)
+        form = UserSettingsForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, 'Your account has been updated.')
-            return redirect('user_settings')
+            return redirect('confirm')
     else:
-        form = EditProfileForm(instance=request.user)
+        form = UserSettingsForm(instance=request.user)
     return render(request, 'user_settings.html', {'form': form})
 
 def user_settings_password(request):
     if request.method == "POST":
-        form = ShortResetForm(request.POST)
+        form = PasswordResetForm(request.POST)
         if (form.is_valid()) and (form.cleaned_data['password2'] == form.cleaned_data['password3']):
-            emailLogin = form.cleaned_data['email']
             passwordLogin = form.cleaned_data['password1']
-            pinLogin = form.cleaned_data['pin']
-            user = authenticate(request, email=emailLogin, password=passwordLogin, pin=pinLogin)
-        
+            user = authenticate(request, email=request.user.email, password=passwordLogin, pin=request.user.pin)
+            
             if (user is not None):
                 user.set_password(form.cleaned_data["password2"])
                 user.save()
+                messages.success(request, "Password changed successfully")
             else:
-                error_message = "Account does not exist."
-                return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
-            return redirect('home')
+                error_message = "Incorrect Old Password"
+                return render(request, 'user_settings_password.html', {'form': form, 'error_message': error_message})
+            return redirect('confirm')
         else:
             print(form.errors)
-            error_message = "Invalid email, password, or pin"
-            return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
+            error_message = "Invalid password"
+            return render(request, 'user_settings_password.html', {'form': form, 'error_message': error_message})
     else:
-        form = ShortResetForm()
+        form = PasswordResetForm()
     return render(request, 'user_settings_password.html', {"form": form})
 
 def user_settings_pin(request):
+    print(request.user.password)
+    print(request.user.email)
     if request.method == "POST":
         form = PinResetForm(request.POST)
-        if (form.is_valid()) and (form.cleaned_data['password2'] == form.cleaned_data['password3']):
-            emailLogin = form.cleaned_data['email']
-            passwordLogin = form.cleaned_data['password1']
-            pinLogin = form.cleaned_data['pin']
-            user = authenticate(request, email=emailLogin, password=passwordLogin, pin=pinLogin)
-        
-            if (user is not None):
-                user.set_password(form.cleaned_data["password2"])
-                user.save()
+        if (form.is_valid()) and (form.cleaned_data['pin2'] == form.cleaned_data['pin3']):
+            pinLogin = form.cleaned_data['pin1']
+            if(request.user.is_authenticated and pinLogin == request.user.pin):
+                request.user.pin = (form.cleaned_data["pin2"])
+                request.user.save()
+                messages.success(request, "Pin changed successfully")
             else:
-                error_message = "Account does not exist."
-                return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
-            return redirect('home')
+                error_message = "Incorrect Old Pin"
+                return render(request, 'user_settings_pin.html', {'form': form, 'error_message': error_message})
+            return redirect('confirm')
         else:
             print(form.errors)
-            error_message = "Invalid email, password, or pin"
-            return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
+            error_message = "Invalid pin"
+            return render(request, 'user_settings_pin.html', {'form': form, 'error_message': error_message})
     else:
         form = PinResetForm()
     return render(request, 'user_settings_pin.html', {"form": form})
@@ -291,7 +289,7 @@ def confirm(request):
 @otp_required
 def transfer_funds(request):
     if request.method == "POST":
-        form = TansferFundsForm(request.POST)
+        form = TransferFundsForm(request.POST)
         form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user)
         form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
         if form.is_valid():
@@ -313,7 +311,7 @@ def transfer_funds(request):
 
             return redirect("confirm")
 
-    form = TansferFundsForm()
+    form = TransferFundsForm()
     form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user)
     form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
     return render(request, 'transfer_funds.html', {"form": form})
