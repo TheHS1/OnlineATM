@@ -1,1 +1,41 @@
 {% extends 'base_admin.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <h1>Bank Reports</h1>
+    <hr>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-6">
+                {{ form.start_date.label }}
+                {{ form.start_date }}
+            </div>
+            <div class="col-md-6">
+                {{ form.end_date.label }}
+                {{ form.end_date }}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-secondary mt-3">Generate Report</button>
+    </form>  
+    
+    {% if accounts_within_range %}
+    <div class="mt-4">
+        <h2>Accounts Opened within Date Range</h2>
+        <ul class="list-group">
+            {% for account in accounts_within_range %}
+            <li class="list-group-item">
+                {{ account.user_id }} - {{ account.account_type }} - {{ account.balance }} - {{ account.date_opened }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <p>No accounts found within the given date range.</p>
+    {% endif %}
+    
+</div>
+
+{% endblock %}

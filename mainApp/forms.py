@@ -4,6 +4,7 @@ from .models import Users
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import ModelForm
 from .models import checkTransactions
+from datetime import date
 
 accountOptions = (('Checkings', 'Checkings'), 
                   ('Savings', 'Savings'), ('Business', 'Business'))
@@ -71,3 +72,7 @@ class PinResetForm(forms.Form):
     pin1 = forms.CharField(label='Old Pin', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'pin1'}))
     pin2 = forms.CharField(label='New Pin', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'pin2'}))
     pin3 = forms.CharField(label='Re-Enter New Pin', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'pin3'}))
+
+class ReportForm(forms.Form):
+    start_date = forms.DateField(label='Start Date', widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
+    end_date = forms.DateField(label='End Date', widget=forms.DateInput( attrs={'type': 'date', 'class': 'form-control'}))

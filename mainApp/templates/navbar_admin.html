@@ -17,6 +17,11 @@
           <li class="nav-item">
             <a class="nav-link active" href="{% url 'check_verification' %}">Check Verification</a>
           </li>
+          {% if user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link active" href="{% url 'logout_view' %}">Log Out</a>
+            </li>
+          {% endif %}
         </ul>
       </div>
     </div>
