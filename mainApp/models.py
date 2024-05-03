@@ -30,7 +30,7 @@ class Accounts(models.Model):
 
     def __str__(self):
         return str(self.id) + " (" + self.account_type + ")" 
-
+    
     id = models.IntegerField(primary_key=True, default = generateID)
     user_id = models.ForeignKey(Users, on_delete=models.CASCADE, null=False)
     balance = models.DecimalField(decimal_places=2, max_digits=50, default=0, null=False)
