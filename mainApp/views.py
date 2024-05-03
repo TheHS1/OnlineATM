@@ -8,7 +8,7 @@ from django_otp.decorators import otp_required
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from .forms import *
 from .models import *
-from django.contrib import messages
+from .admin import *
 
 from scripts import processCheck
 
@@ -22,7 +22,6 @@ from base64 import b64encode
 def home(request):
     if request.method == "POST":
         devices = devices_for_user(request.user, confirmed=None)
-
         # check if otp form was submitted or normal login form
         if ('verify' in request.POST):
             form = OtpForm(request.POST)
@@ -109,31 +108,57 @@ def register_view(request):
 
 def reset_password(request):
     if request.method == "POST":
-        form = ResetForm(request.POST)
-        if (form.is_valid()) and (form.cleaned_data['password2'] == form.cleaned_data['password3']):
-            emailLogin = form.cleaned_data['email']
-            passwordLogin = form.cleaned_data['password1']
-            pinLogin = form.cleaned_data['pin']
-            user = authenticate(request, email=emailLogin, password=passwordLogin, pin=pinLogin)
-            
-            if (user is not None):
-                user.set_password(form.cleaned_data["password2"])
-                user.save()
-            else:
-                error_message = "Account does not exist."
-                return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
-            return redirect('home')
-        
-        elif ((form.cleaned_data['password2'] != form.cleaned_data['password3'])):
-            error_message = "Passwords do not match"
-            return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
-        
+        devices = devices_for_user(request.user, confirmed=None)
+        print("1")
+        # check if otp form was submitted or normal login form
+        if ('verify' in request.POST):
+            form = OtpForm(request.POST)
+            print("2")
+            # check if submitted token matches device token
+            if form.is_valid():
+                print("3")
+                token = form.cleaned_data['otp_token']
+                for device in devices:
+                    if isinstance(device, TOTPDevice) and device.verify_token(token):
+                        if device.confirmed == False:
+                            device.confirmed = True;
+                            device.save()
+                        verifyOTP(request, device)
+                        return redirect('reset_password')
+                error_message = "Incorrect OTP code"
+                form = OtpForm()
+                return render(request, 'reset_password.html', {'form': form, 'title': 'Verify your identity', 'error_message': error_message})
         else:
-            error_message = "Invalid email or pin"
-            return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
+            print("4")
+            hasDevice = False
+            form = ResetForm(request.POST)
+
+            # login user if valid
+            if form.is_valid() and form.cleaned_data["password2"] == form.cleaned_data["password3"]:
+                print("5")
+                emailLogin = form.cleaned_data['email']
+                user = authenticate(request, email=emailLogin)
+                
+                if user is not None:
+                    print("6")
+                    user.password = form.cleaned_data["password2"]
+                    user.save()
+                    # Check if the user has a registered otp device
+                    for device in devices:
+                        if isinstance(device, TOTPDevice):
+                            hasDevice = True
+                    if hasDevice:
+                        form = OtpForm()
+                        return render(request, 'reset_password.html', {'form': form, 'title': 'Verify your identity'})
+                    return redirect(otp_register)
+                else:
+                    print("7")
+                    error_message = "Invalid email."
+                return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})     
     else:
         form = ResetForm()
-
+        if request.user.is_verified():
+            return redirect('reset_password')
     return render(request, 'reset_password.html', {'form': form})
 
 @otp_required
@@ -435,7 +460,28 @@ def admin_view(request):
         return render(request, 'admin_view.html')
     
 def admin_transaction_history(request):
-    return render(request, 'admin_transaction_history.html')
+    transactions = Transactions.objects.all()
+    transactions = transactions.order_by('-timestamp')
+    try:
+        if request.method == "POST":
+            transaction_id = request.POST.get('transaction_id')
+            transaction = Transactions.objects.get(id=transaction_id)
+
+            amt = transaction.amount
+            src = transaction.source
+            dst = transaction.destination
+
+            src.balance += amt
+            dst.balance -= amt
+
+            src.save()
+            dst.save()
+
+            transaction.delete()
+    except:
+        pass
+        
+    return render(request, 'admin_transaction_history.html', {'transactions': transactions})
 
 def bank_reports(request):
     form = ReportForm(request.POST or None)
