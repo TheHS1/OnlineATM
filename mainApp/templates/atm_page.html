@@ -65,13 +65,14 @@
 <body>
     <h1>Frank Vault ATM</h1> <!-- Title added here -->
     <h2>How much would you like to withdraw?</h2>
-    <form method="POST" action="{% url 'withdraw_success' %}">
+    <form method="POST" action="">
+        {% csrf_token %}
         <label for="account">Account Number:</label>
-        <input type="text" id="account" name="account" value="{{ accounts.0.id }}" readonly><br><br>
+        <input type="text" id="account" name="account" value="{{ account.id }}" readonly><br><br>
         <label for="balance">Balance:</label>
-        <input type="text" id="balance" name="balance" value="${{ accounts.0.balance }}" readonly><br><br>
-        <label for="withdrawal_amount">Enter amount:</label>
-        <input type="text" id="withdrawal_amount" name="withdrawal_amount" required><br><br>
+        <input type="text" id="balance" name="balance" value="${{ account.balance }}" readonly><br><br>
+        <label for="withdrawal">Enter amount:</label>
+        <input type="text" id="withdrawal" name="withdrawal" required><br><br>
         <button type="submit">Withdraw</button>
     </form>
 </body>

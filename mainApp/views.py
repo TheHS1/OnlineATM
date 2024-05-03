@@ -416,36 +416,28 @@ def atm_login(request):
 
 # @login_required
 def atm_page(request, account_id):
+    account = Accounts.objects.get(id=account_id)
     if request.method == "POST":
-        if 'withdrawal' in request.POST:
-            # account_id = request.POST.get('account')
-            withdrawal_amount = request.POST.get('withdrawal_amount')
+        # if 'withdrawal' in request.POST:
+        # account_id = request.POST.get('account')
+        withdrawal_amount = request.POST.get('withdrawal_amount')
 
-            try:
-                account = Accounts.objects.get(pk=account_id)
+        try:
+            account = Accounts.objects.get(id=account_id)
 
-                # Validate withdrawal amount
-                if not withdrawal_amount.isdigit() or int(withdrawal_amount) <= 0:
-                    messages.error(request, "Withdrawal amount must be a positive integer.")
-                    return redirect('atm_page')
+            
 
-                withdrawal_amount = int(withdrawal_amount)
+            account.balance -= withdrawal_amount
+            account.save()
 
-                if withdrawal_amount > account.balance:
-                    messages.error(request, "Insufficient funds. Please enter a lower withdrawal amount.")
-                    return redirect('atm_page')
+            return redirect('withdraw_success')
 
-                account.balance -= withdrawal_amount
-                account.save()
-
-                return redirect('withdraw_success')
-
-            except Accounts.DoesNotExist:
-                messages.error(request, "Selected account does not exist.")
-                return redirect('atm_page')
+        except Accounts.DoesNotExist:
+            messages.error(request, "Selected account does not exist.")
+            return redirect('atm_page')
 
     # accounts = request.user.accounts.all()
-    return render(request, 'ATM.html')
+    return render(request, 'atm_page.html', {"account": account})
 
 
 def withdraw_success(request):
