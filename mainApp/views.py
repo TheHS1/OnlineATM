@@ -394,63 +394,59 @@ def check_verification(request):
     form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
     return render(request, 'transfer_funds.html', {"form": form})
 
+
 def atm_login(request):
     if request.method == "POST":
-        form = LoginForm(request.POST)
+        form = ATMLoginForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data['email']
+            account_number = form.cleaned_data['account_number']
             pin = form.cleaned_data['pin']
-            user = authenticate(request, email=email, pin=pin)
+            # Assuming Accounts model has fields 'account_number' and 'pin'
             
-            if user is not None:
-                login(request, user)
+            if Accounts.objects.get(id=account_number) and Users.objects.get(pin=pin):
                 # Redirect the user to the appropriate URL after successful login
-                return redirect('ATM.html')  # Redirect to ATM.html
+                return redirect('atm_page', account_id=account_number)  # Redirect to the ATM page
             else:
                 # If authentication fails, add an error to the form
-                form.add_error(None, "Invalid email or PIN")
+                form.add_error(None, "Invalid account number or PIN")
     else:
-        form = LoginForm()
+        form = ATMLoginForm()
     
     return render(request, 'atm_login.html', {'form': form})
 
-@login_required
-def atm_page(request):
+# @login_required
+def atm_page(request, account_id):
     if request.method == "POST":
         if 'withdrawal' in request.POST:
-            account_id = request.POST.get('account')
-            withdrawal_amount = int(request.POST.get('withdrawal_amount'))
+            # account_id = request.POST.get('account')
+            withdrawal_amount = request.POST.get('withdrawal_amount')
 
             try:
-                # Retrieve the selected account
                 account = Accounts.objects.get(pk=account_id)
 
-                # Check if the withdrawal amount exceeds the available balance
+                # Validate withdrawal amount
+                if not withdrawal_amount.isdigit() or int(withdrawal_amount) <= 0:
+                    messages.error(request, "Withdrawal amount must be a positive integer.")
+                    return redirect('atm_page')
+
+                withdrawal_amount = int(withdrawal_amount)
+
                 if withdrawal_amount > account.balance:
-                    # Display error message if the withdrawal amount is greater than the available balance
                     messages.error(request, "Insufficient funds. Please enter a lower withdrawal amount.")
                     return redirect('atm_page')
 
-                # Subtract withdrawal amount from the account balance
                 account.balance -= withdrawal_amount
                 account.save()
 
-                # Redirect to a success page
                 return redirect('withdraw_success')
 
             except Accounts.DoesNotExist:
-                # Handle case where account does not exist
                 messages.error(request, "Selected account does not exist.")
                 return redirect('atm_page')
-            except ValueError:
-                # Handle case where withdrawal amount is not a valid integer
-                messages.error(request, "Invalid withdrawal amount.")
-                return redirect('atm_page')
 
-    # Fetch user's accounts to populate the dropdown
-    accounts = request.user.accounts.all()  # Assuming the user's accounts are related to the user model
+    # accounts = request.user.accounts.all()
+    return render(request, 'ATM.html')
 
-    return render(request, 'ATM.html', {'accounts': accounts})
 
 def withdraw_success(request):
     return render(request, 'withdraw_success.html')

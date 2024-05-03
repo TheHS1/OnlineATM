@@ -18,10 +18,14 @@ path('confirm_account_deletion/', views.confirm_account_deletion, name='confirm_
     path('register_view/', views.register_view, name='register_view'),
     path('reset_password/', views.reset_password, name='reset_password'),
     path('atm_login/', views.atm_login, name='atm_login'),
-    path('atm_login/ATM.html', views.atm_page, name='ATM.html'),
     path('logout_view', views.logout_view, name='logout_view'),
     path('admin_transaction_history/', views.admin_transaction_history, name='admin_transaction_history'),
     path('bank_reports/', views.bank_reports, name='bank_reports'),
     path('check_verification/', views.check_verification, name='check_verification'),
+    path('atm_page/<int:account_id>/', views.atm_page, name='atm_page'),
+    path('withdraw_success/', views.withdraw_success, name='withdraw_success'),
+    path('accounts/login/', views.atm_login, name='accounts_login_redirect'),
+
+
 ]
 
