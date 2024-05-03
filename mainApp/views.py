@@ -72,12 +72,10 @@ def atm_login(request):
             account_number = form.cleaned_data['account_number']
             pin = form.cleaned_data['pin']
             # Assuming Accounts model has fields 'account_number' and 'pin'
-            user = authenticate(request, account_number=account_number, pin=pin)
             
-            if user is not None:
-                login(request, user)
+            if Accounts.objects.get(id=account_number) and Users.objects.get(pin=pin):
                 # Redirect the user to the appropriate URL after successful login
-                return redirect('atm_page')  # Redirect to the ATM page
+                return redirect('atm_page', account_id=account_number)  # Redirect to the ATM page
             else:
                 # If authentication fails, add an error to the form
                 form.add_error(None, "Invalid account number or PIN")
@@ -86,11 +84,11 @@ def atm_login(request):
     
     return render(request, 'atm_login.html', {'form': form})
 
-@login_required
-def atm_page(request):
+# @login_required
+def atm_page(request, account_id):
     if request.method == "POST":
         if 'withdrawal' in request.POST:
-            account_id = request.POST.get('account')
+            # account_id = request.POST.get('account')
             withdrawal_amount = request.POST.get('withdrawal_amount')
 
             try:
@@ -116,8 +114,8 @@ def atm_page(request):
                 messages.error(request, "Selected account does not exist.")
                 return redirect('atm_page')
 
-    accounts = request.user.accounts.all()
-    return render(request, 'ATM.html', {'accounts': accounts})
+    # accounts = request.user.accounts.all()
+    return render(request, 'ATM.html')
 
 
 def withdraw_success(request):
