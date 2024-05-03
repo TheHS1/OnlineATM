@@ -110,13 +110,14 @@ def register_view(request):
 def reset_password(request):
     if request.method == "POST":
         devices = devices_for_user(request.user, confirmed=None)
-
+        print("1")
         # check if otp form was submitted or normal login form
         if ('verify' in request.POST):
             form = OtpForm(request.POST)
-
+            print("2")
             # check if submitted token matches device token
             if form.is_valid():
+                print("3")
                 token = form.cleaned_data['otp_token']
                 for device in devices:
                     if isinstance(device, TOTPDevice) and device.verify_token(token):
@@ -129,15 +130,20 @@ def reset_password(request):
                 form = OtpForm()
                 return render(request, 'reset_password.html', {'form': form, 'title': 'Verify your identity', 'error_message': error_message})
         else:
+            print("4")
             hasDevice = False
             form = ResetForm(request.POST)
 
             # login user if valid
             if form.is_valid() and form.cleaned_data["password2"] == form.cleaned_data["password3"]:
+                print("5")
                 emailLogin = form.cleaned_data['email']
                 user = authenticate(request, email=emailLogin)
                 
                 if user is not None:
+                    print("6")
+                    user.password = form.cleaned_data["password2"]
+                    user.save()
                     # Check if the user has a registered otp device
                     for device in devices:
                         if isinstance(device, TOTPDevice):
@@ -147,7 +153,8 @@ def reset_password(request):
                         return render(request, 'reset_password.html', {'form': form, 'title': 'Verify your identity'})
                     return redirect(otp_register)
                 else:
-                    error_message = "Invalid username or password."
+                    print("7")
+                    error_message = "Invalid email."
                 return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})     
     else:
         form = ResetForm()

@@ -56,7 +56,6 @@ class EditProfileForm(ModelForm):
 
 class ResetForm(forms.Form):
     email = forms.EmailField(label='Email address', widget=forms.EmailInput(attrs={'class': 'form-control', 'id': 'email', 'aria-describedby': 'emailHelp'}))
-    password1 = forms.CharField(label='Old Password', widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'password1'}))
     password2 = forms.CharField(label='New Password', widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'password2'}))
     password3 = forms.CharField(label='Re-Enter New Password', widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'password3'}))
 
