@@ -274,13 +274,11 @@ def transaction_history(request):
 
 @otp_required
 def accounts_view(request):
-    if request.method == "POST":
-        if 'delete' in request.POST and request.user.is_authenticated:
-            account_id = request.POST['account_id']
-            if Accounts.objects.filter(user_id=request.user, id=account_id).delete():
-                messages.success(request, "Account closed successfully.")
-                return redirect("confirm")
-        elif 'add' in request.POST and request.user.is_authenticated:
+    if request.method == "POST" and request.user.is_authenticated:
+        if 'delete' in request.POST:
+            request.session['account_id_to_delete'] = request.POST['account_id']
+            return redirect("confirm_account_deletion")
+        elif 'add' in request.POST:
             form = addAccountForm(request.POST)
             if form.is_valid():
                 type = form.cleaned_data["accountType"]
@@ -293,6 +291,23 @@ def accounts_view(request):
     form = addAccountForm()
     accounts = Accounts.objects.filter(user_id=request.user)
     return render(request, 'accounts_view.html', {'form': form, 'accounts': accounts})
+@otp_required
+def confirm_account_deletion(request):
+    if request.method == "POST":
+        account_id = request.POST.get('account_id')
+        if account_id:
+            account = Accounts.objects.filter(id=account_id, user_id=request.user).first()
+            if account:
+                account.delete()
+                messages.success(request, "Account closed successfully.")
+                return redirect('confirm')
+            else:
+                messages.error(request, "Account not found.")
+        else:
+            messages.error(request, "No account selected for deletion.")
+        return redirect("accounts_view")
+    else:
+        return redirect('accounts_view')
 
 def confirm(request):
     return render(request, 'confirmation.html')
