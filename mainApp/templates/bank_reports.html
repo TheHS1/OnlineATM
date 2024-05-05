@@ -4,6 +4,20 @@
 
 <div class="container mt-4">
     <h1>Bank Reports</h1>
+
+    <hr>
+
+    <h4>Total Amount in Bank: <span style="font-weight: normal;">${{ total_amount_in_bank|floatformat:2 }}</span></h4>
+    <h4>Average Account Balance: <span style="font-weight: normal;">${{ average_balance|floatformat:2 }}</span></h4>
+    
+    <h4>Total Amount by Account Type:</h4>
+    <ul>
+        {% for account in total_by_account_type %}
+        <li>{{ account.account_type }}: <span style="font-weight: normal;">${{ account.total|floatformat:2 }}</span></li>
+        {% endfor %}
+    </ul>
+
+    <h1>Activity Report</h1>
     <hr>
 
     <form method="POST">

@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django_otp import devices_for_user, login as verifyOTP
 from django_otp.decorators import otp_required
 from django_otp.plugins.otp_totp.models import TOTPDevice
+from django.db.models import Sum, Avg
 from .forms import *
 from .models import *
 import uuid
@@ -345,6 +346,9 @@ def bank_reports(request):
     accounts_within_range = None
     users_within_range = None
     deleted_accounts_within_range = None
+    total_amount_in_bank = Accounts.objects.aggregate(total=Sum('balance'))['total'] or 0
+    average_balance = Accounts.objects.aggregate(average=Avg('balance'))['average'] or 0
+    total_by_account_type = Accounts.objects.values('account_type').annotate(total=Sum('balance'))
 
     if request.method == "POST":
         if form.is_valid():
@@ -355,7 +359,12 @@ def bank_reports(request):
             users_within_range = Users.objects.filter(date_opened__gte=start_date, date_opened__lte=end_date)
             deleted_accounts_within_range = DeletedAccount.objects.filter(date_deleted__gte=start_date, date_deleted__lte=end_date)
     
-    return render(request, 'bank_reports.html', {'form': form, 'accounts_within_range': accounts_within_range, 'users_within_range': users_within_range, 'deleted_accounts_within_range': deleted_accounts_within_range})
+    return render(request, 'bank_reports.html', {'form': form, 'accounts_within_range': accounts_within_range, 
+                                                 'users_within_range': users_within_range, 
+                                                 'deleted_accounts_within_range': deleted_accounts_within_range, 
+                                                 'total_amount_in_bank': total_amount_in_bank,
+                                                 'average_balance': average_balance,
+                                                 'total_by_account_type': total_by_account_type})
 
 def check_verification(request):
     return render(request, 'check_verification.html')
