@@ -23,7 +23,7 @@
     
     {% if accounts_within_range %}
     <div class="mt-4">
-        <h2>Accounts Opened within Date Range</h2>
+        <h2>Accounts Opened within Date Range ({{ accounts_within_range.count }})</h2>
         <ul class="list-group">
             {% for account in accounts_within_range %}
             <li class="list-group-item">
@@ -38,7 +38,7 @@
 
     {% if users_within_range %}
     <div class="mt-4">
-        <h2>Customer Accounts Opened within Date Range</h2>
+        <h2>Customer Accounts Opened within Date Range ({{ users_within_range.count }})</h2>
         <ul class="list-group">
             {% for user in users_within_range %}
             <li class="list-group-item">
@@ -49,6 +49,21 @@
     </div>
     {% else %}
     <p class="mt-4">No customer accounts found within the given date range.</p>
+    {% endif %}
+
+    {% if deleted_accounts_within_range %}
+    <div class="mt-4">
+        <h2>Deleted Accounts within Date Range ({{ deleted_accounts_within_range.count }})</h2>
+        <ul class="list-group">
+            {% for account in deleted_accounts_within_range %}
+            <li class="list-group-item">
+                Account ID: {{ account.account_id }} - User ID: {{ account.user_id.id }} - Type: {{ account.account_type }} - Balance: {{ account.balance }} - Opened: {{ account.date_opened }} - Deleted: {{ account.date_deleted }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <p class="mt-4">No deleted accounts found within the given date range.</p>
     {% endif %}
 
 </div>

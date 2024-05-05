@@ -218,9 +218,14 @@ def accounts_view(request):
     if request.method == "POST":
         if 'delete' in request.POST and request.user.is_authenticated:
             account_id = request.POST['account_id']
-            if Accounts.objects.filter(user_id=request.user, id=account_id).delete():
+            account = Accounts.objects.filter(user_id=request.user, id=account_id).first()
+
+            if account:
+                DeletedAccount.objects.create(account_id=account.id, user_id=account.user_id, balance=account.balance, date_opened=account.date_opened, account_type=account.account_type,)
+                account.delete()
                 messages.success(request, "Account closed successfully.")
                 return redirect("confirm")
+                
         elif 'add' in request.POST and request.user.is_authenticated:
             form = addAccountForm(request.POST)
             if form.is_valid():
@@ -347,9 +352,10 @@ def bank_reports(request):
 
             accounts_within_range = Accounts.objects.filter(date_opened__gte=start_date, date_opened__lte=end_date)
             users_within_range = Users.objects.filter(date_opened__gte=start_date, date_opened__lte=end_date)
-
+            deleted_accounts_within_range = DeletedAccount.objects.filter(date_deleted__gte=start_date, date_deleted__lte=end_date
+)
     
-    return render(request, 'bank_reports.html', {'form': form, 'accounts_within_range': accounts_within_range, 'users_within_range': users_within_range})
+    return render(request, 'bank_reports.html', {'form': form, 'accounts_within_range': accounts_within_range, 'users_within_range': users_within_range, 'deleted_accounts_within_range': deleted_accounts_within_range})
 
 def check_verification(request):
     return render(request, 'check_verification.html')
