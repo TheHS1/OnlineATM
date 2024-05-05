@@ -344,6 +344,7 @@ def bank_reports(request):
     form = ReportForm(request.POST or None)
     accounts_within_range = None
     users_within_range = None
+    deleted_accounts_within_range = None
 
     if request.method == "POST":
         if form.is_valid():
@@ -352,8 +353,7 @@ def bank_reports(request):
 
             accounts_within_range = Accounts.objects.filter(date_opened__gte=start_date, date_opened__lte=end_date)
             users_within_range = Users.objects.filter(date_opened__gte=start_date, date_opened__lte=end_date)
-            deleted_accounts_within_range = DeletedAccount.objects.filter(date_deleted__gte=start_date, date_deleted__lte=end_date
-)
+            deleted_accounts_within_range = DeletedAccount.objects.filter(date_deleted__gte=start_date, date_deleted__lte=end_date)
     
     return render(request, 'bank_reports.html', {'form': form, 'accounts_within_range': accounts_within_range, 'users_within_range': users_within_range, 'deleted_accounts_within_range': deleted_accounts_within_range})
 
