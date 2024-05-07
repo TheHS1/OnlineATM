@@ -37,7 +37,6 @@
             margin-bottom: 10px;
             font-size: 18px;
         }
-        select,
         input[type="text"] {
             width: 300px;
             padding: 12px;
@@ -66,15 +65,14 @@
 <body>
     <h1>Frank Vault ATM</h1> <!-- Title added here -->
     <h2>How much would you like to withdraw?</h2>
-    <form method="POST" action="{% url 'withdrawal' %}">
-        <label for="account">Select Account:</label>
-        <select id="account" name="account">
-            {% for account in accounts %}
-            <option value="{{ account.id }}">Account Number: {{ account.id }} - {{ account.account_type }} - Balance: ${{ account.balance }}</option>
-            {% endfor %}
-        </select><br><br>
-        <label for="withdrawal_amount">Enter amount:</label>
-        <input type="text" id="withdrawal_amount" name="withdrawal_amount" required><br><br>
+    <form method="POST" action="">
+        {% csrf_token %}
+        <label for="account">Account Number:</label>
+        <input type="text" id="account" name="account" value="{{ account.id }}" readonly><br><br>
+        <label for="balance">Balance:</label>
+        <input type="text" id="balance" name="balance" value="${{ account.balance }}" readonly><br><br>
+        <label for="withdrawal">Enter amount:</label>
+        <input type="text" id="withdrawal" name="withdrawal" required><br><br>
         <button type="submit">Withdraw</button>
     </form>
 </body>

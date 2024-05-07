@@ -74,3 +74,6 @@ class PinResetForm(forms.Form):
 class ReportForm(forms.Form):
     start_date = forms.DateField(label='Start Date', widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
     end_date = forms.DateField(label='End Date', widget=forms.DateInput( attrs={'type': 'date', 'class': 'form-control'}))
+class ATMLoginForm(forms.Form):
+    account_number = forms.CharField(label='Account Number', max_length=100, widget=forms.TextInput(attrs={'required': True}))
+    pin = forms.CharField(label='PIN', widget=forms.PasswordInput(attrs={'required': True}))
