@@ -48,6 +48,8 @@
     </div>
     <!-- this is where new cards will go here -->
     {% for account in accounts %}
+    {% if account.is_deleted %}
+    {% else %}
     <div class="col d-flex" id={{ account.id }}>
         <div class="card mb-3 w-100 card-container"> 
           <p class="card-id font-monospace">{{ account.id }}</p>
@@ -80,6 +82,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
     {% endfor %}
   </div>
 </div>
