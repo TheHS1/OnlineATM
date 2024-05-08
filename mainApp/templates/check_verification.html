@@ -1,1 +1,34 @@
 {% extends 'base_admin.html' %}
+
+{% block content %}
+<div class="container my-5">
+  <h2 class="mb-4">Check Queue</h2>
+  <table class="table table-striped table-bordered">
+    <thead class="table-dark">
+      <tr>
+        <th scope="col">Check Image</th>
+        <th scope="col">Amount</th>
+        <th scope="col">Revert</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for checkTransaction in checkTransactions %}
+      <tr>
+        <td>
+            <img src="{{ checkTransaction.front.url }}" class="img-thumbnail mt-2 d-block mx-auto" style="max-width: 500px; max-height: 300px; display: none;"/> 
+        </td>
+        <td>{{ checkTransaction.transaction.amount }}</td>
+        <td>
+            <form method="POST" action="{% url 'check_verification' %}">
+            {% csrf_token %}
+            <input type="hidden" name="checkTransaction_id" value="{{ checkTransaction.transaction.id }}">
+            <button type="submit" class="btn btn-success mb-4" name="AuthButton">Authorize</button>
+            <button type="submit" class="btn btn-danger mb-4" name="CancelButton">Cancel</button>
+            </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

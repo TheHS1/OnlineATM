@@ -44,6 +44,7 @@ class Transactions(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     amount = models.IntegerField(null = False)
     timestamp = models.TimeField(auto_now_add=True)
+    error = models.BooleanField(default=False)
 
 class checkTransactions(models.Model):
     transaction = models.ForeignKey(Transactions, on_delete = models.CASCADE, related_name='transaction', null = True)
@@ -53,3 +54,4 @@ class checkTransactions(models.Model):
     spelled_amount = models.CharField(max_length=100, null=False)
     recipient_name = models.CharField(max_length=50, null=False)
     memo = models.CharField(max_length=100, null=False)
+    

@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container my-5">
-  <h2 class="mb-4">My Transactions</h2>
+  <h2 class="mb-4">User Transactions</h2>
   <table class="table table-striped table-bordered">
     <thead class="table-dark">
       <tr>
@@ -24,7 +24,7 @@
             <form method="POST" action="{% url 'admin_transaction_history' %}">
             {% csrf_token %}
             <input type="hidden" name="transaction_id" value="{{ transaction.id }}">
-            <button type="submit" class="btn btn-secondary mb-4" name="button">Revert</button>
+            <button type="submit" class="btn btn-danger mb-4" name="button">Revert</button>
             </form>
         </td>
       </tr>

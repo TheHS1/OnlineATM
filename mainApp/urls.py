@@ -1,10 +1,13 @@
 from django.urls import path
 from . import views
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('', views.home, name='home'),
     path('confirmation/', views.confirm, name='confirm'),
-path('confirm_account_deletion/', views.confirm_account_deletion, name='confirm_account_deletion'),
+    path('confirm_account_deletion/', views.confirm_account_deletion, name='confirm_account_deletion'),
     path('otp_register/', views.otp_register, name='otp_register'),
     path('customer_view/', views.customer_view, name='customer_view'),
     path('admin_view/', views.admin_view, name='admin_view'),
@@ -29,3 +32,5 @@ path('confirm_account_deletion/', views.confirm_account_deletion, name='confirm_
 
 ]
 
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

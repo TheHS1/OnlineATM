@@ -218,10 +218,26 @@ def deposit_view(request):
                         messages.error(request, "Source account has insufficient funds")
 
                 else:
-                    checkTransaction.delete()
+                    transaction = Transactions.objects.create(destination=dest, source=sender, amount=amt, error=True)
+
+                    checkTransaction.transaction = transaction
+                    checkTransaction.sender_info = sender_info
+                    checkTransaction.spelled_amount = spelled_amount
+                    checkTransaction.recipient_name = recipient
+                    checkTransaction.memo = memo
+
+                    checkTransaction.save()
                     messages.error(request, "Check amount does not match listed amount")
             else:
-                checkTransaction.delete()
+                transaction = Transactions.objects.create(destination=dest, source=sender, amount=amt, error=True)
+
+                checkTransaction.transaction = transaction
+                checkTransaction.sender_info = sender_info
+                checkTransaction.spelled_amount = spelled_amount
+                checkTransaction.recipient_name = recipient
+                checkTransaction.memo = memo
+
+                checkTransaction.save()
                 messages.error(request, "Could not read check")
 
             return redirect("confirm")
@@ -292,7 +308,7 @@ def user_settings_pin(request):
 def transaction_history(request):
 
     user_accounts = Accounts.objects.filter(user_id=request.user)
-    transactions = Transactions.objects.filter(source__in=user_accounts) | Transactions.objects.filter(destination__in=user_accounts)
+    transactions = Transactions.objects.filter(source__in=user_accounts) | Transactions.objects.filter(destination__in=user_accounts, error=False)
     transactions = transactions.order_by('-timestamp')
 
     return render(request, 'transaction_history.html', {'transactions': transactions})
@@ -375,26 +391,6 @@ def transfer_funds(request):
     form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
     return render(request, 'transfer_funds.html', {"form": form})
 
-@otp_required
-def admin_view(request):
-    if request.user.is_superuser:
-        return render(request, 'admin_view.html')
-    
-def admin_transaction_history(request):
-    return render(request, 'admin_transaction_history.html')
-
-def bank_reports(request):
-    return render(request, 'bank_reports.html')
-
-def check_verification(request):
-    return render(request, 'check_verification.html')
-
-    form = TansferFundsForm()
-    form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user)
-    form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
-    return render(request, 'transfer_funds.html', {"form": form})
-
-
 def atm_login(request):
     if request.method == "POST":
         form = ATMLoginForm(request.POST)
@@ -425,8 +421,6 @@ def atm_page(request, account_id):
         try:
             account = Accounts.objects.get(id=account_id)
 
-            
-
             account.balance -= withdrawal_amount
             account.save()
 
@@ -443,12 +437,13 @@ def atm_page(request, account_id):
 def withdraw_success(request):
     return render(request, 'withdraw_success.html')
 
+@otp_required
 def admin_view(request):
     if request.user.is_superuser:
         return render(request, 'admin_view.html')
     
 def admin_transaction_history(request):
-    transactions = Transactions.objects.all()
+    transactions = Transactions.objects.filter(error=False)
     transactions = transactions.order_by('-timestamp')
     try:
         if request.method == "POST":
@@ -488,4 +483,32 @@ def bank_reports(request):
     return render(request, 'bank_reports.html', {'form': form, 'accounts_within_range': accounts_within_range, 'users_within_range': users_within_range})
 
 def check_verification(request):
-    return render(request, 'check_verification.html')
+    transactions = Transactions.objects.filter(error=True)
+    checks = checkTransactions.objects.filter(transaction__error=True)
+    try:
+        if request.method == "POST":
+            transaction_id = request.POST.get('checkTransaction_id')
+
+            transaction = Transactions.objects.get(id=transaction_id)
+            checkTransaction = checkTransactions.objects.get(transaction=transaction)
+
+            if 'AuthButton' in request.POST:
+                amt = transaction.amount
+                sender = transaction.source
+                dest = transaction.destination
+
+                sender.balance -= amt
+                dest.balance += amt
+                transaction.error = False
+
+                sender.save()
+                dest.save()
+                transaction.save()
+            elif 'CancelButton' in request.POST:       
+                print("BOOM") 
+                checkTransaction.delete()
+                transaction.delete()
+    except:
+        pass
+
+    return render(request, 'check_verification.html', {'checkTransactions': checks})
