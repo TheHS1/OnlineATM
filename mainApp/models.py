@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MinLengthValidator
 import uuid
 import random
 from django.utils import timezone
@@ -9,7 +10,7 @@ class Users(AbstractUser):
     phone_number = models.CharField(max_length=15, null=False, default='')
     address = models.CharField(max_length=200, null=False, default='')
     email = models.EmailField(max_length=100, unique=True, default='')
-    pin = models.CharField(max_length=4, default='')
+    pin = models.CharField(max_length=4, default='', validators=[MinLengthValidator(4)])
     date_opened = models.DateField(auto_now_add = True, null=True)
 
     username = None
