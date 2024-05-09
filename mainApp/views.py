@@ -175,7 +175,7 @@ def logout_view(request):
 def deposit_view(request):
     if request.method == "POST":
         form = UploadCheckForm(request.POST, request.FILES)
-        form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user)
+        form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user, is_deleted=False)
         if form.is_valid():
             dest = form.cleaned_data["account"]
             amt = form.cleaned_data["amount"]
@@ -228,7 +228,7 @@ def deposit_view(request):
             return redirect("confirm")
 
     form = UploadCheckForm()
-    form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user)
+    form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user, is_deleted=False)
     return render(request, 'deposit_view.html', {"form": form})
 
 @otp_required
@@ -315,7 +315,7 @@ def accounts_view(request):
         return redirect("accounts_view")
 
     form = addAccountForm()
-    accounts = Accounts.objects.filter(user_id=request.user)
+    accounts = Accounts.objects.filter(user_id=request.user, is_deleted=False)
     return render(request, 'accounts_view.html', {'form': form, 'accounts': accounts})
 @otp_required
 def confirm_account_deletion(request):
@@ -324,7 +324,8 @@ def confirm_account_deletion(request):
         if account_id:
             account = Accounts.objects.filter(id=account_id, user_id=request.user).first()
             if account:
-                account.delete()
+                account.is_deleted = True
+                account.save()
                 messages.success(request, "Account closed successfully.")
                 return redirect('confirm')
             else:
@@ -350,8 +351,8 @@ def confirm(request):
 def transfer_funds(request):
     if request.method == "POST":
         form = TransferFundsForm(request.POST)
-        form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user)
-        form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
+        form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user, is_deleted=False)
+        form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user, is_deleted=False)
         if form.is_valid():
             srce = form.cleaned_data["account1"] # account money taken from
             dest = form.cleaned_data["account2"] # account getting money
@@ -372,8 +373,8 @@ def transfer_funds(request):
             return redirect("confirm")
 
     form = TransferFundsForm()
-    form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user)
-    form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
+    form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user, is_deleted=False)
+    form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user, is_deleted=False)
     return render(request, 'transfer_funds.html', {"form": form})
 
 @otp_required
