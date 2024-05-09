@@ -10,7 +10,7 @@ from .forms import *
 from .models import *
 from django.contrib import messages
 
-from scripts import processCheck
+from .tasks import *
 
 # For generating otp qr codes
 import qrcode
@@ -155,49 +155,14 @@ def deposit_view(request):
             amt = form.cleaned_data["amount"]
 
             checkTransaction = form.save()
-            data = processCheck.getCheckInfo(checkTransaction.front.path)
+            transaction = Transactions.objects.create(destination=dest, amount=amt)
+            transaction.save()
 
-            if all(value != '' for value in data.values()):
-                sender_id = int(data['sender_account'])
-                sender_info = data['sender_info']
-                recorded_date = data['date']
-                spelled_amount = data['spelled_amount']
-                recipient = data['recipient']
-                memo = data['memo']
-                sender = Accounts.objects.get(id=sender_id)
+            checkTransaction.transaction = transaction
+            checkTransaction.save()
+            procCheck.delay_on_commit(checkTransaction.id, checkTransaction.front.path)
 
-                if float(data['numerical_amount']) == float(amt):
-                    if sender.balance >= amt:
-                        transaction = Transactions.objects.create(destination=dest, source=sender, amount=amt)
-    # sender_info = models.CharField(max_length=100)
-    # writeDate = models.TimeField(auto_now_add=False)
-    # numericalAmount = models.CharField(max_length=100)
-    # recipientName = models.CharField(max_length=50)
-    # memo = models.CharField(max_length=100)
-                        checkTransaction.transaction = transaction
-                        checkTransaction.sender_info = sender_info
-                        checkTransaction.spelled_amount = spelled_amount
-                        checkTransaction.recipient_name = recipient
-                        checkTransaction.memo = memo
-
-                        sender.balance -= amt
-                        dest.balance += amt
-
-                        sender.save()
-                        dest.save()
-                        checkTransaction.save()
-
-                        messages.success(request, "Check deposited successfully.")
-                    else: 
-                        checkTransaction.delete()
-                        messages.error(request, "Source account has insufficient funds")
-
-                else:
-                    checkTransaction.delete()
-                    messages.error(request, "Check amount does not match listed amount")
-            else:
-                checkTransaction.delete()
-                messages.error(request, "Could not read check")
+            messages.success(request, "Check deposited successfully.")
 
             return redirect("confirm")
 

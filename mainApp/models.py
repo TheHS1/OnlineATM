@@ -37,7 +37,7 @@ class Accounts(models.Model):
 
 
 class Transactions(models.Model):
-    source = models.ForeignKey(Accounts, on_delete=models.PROTECT, null=False, related_name='source')
+    source = models.ForeignKey(Accounts, on_delete=models.PROTECT, null=True, related_name='source')
     destination = models.ForeignKey(Accounts, on_delete=models.PROTECT, null=False, related_name='destination')
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     amount = models.IntegerField(null = False)
