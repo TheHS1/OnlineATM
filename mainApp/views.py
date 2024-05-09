@@ -9,6 +9,7 @@ from django_otp.plugins.otp_totp.models import TOTPDevice
 from .forms import *
 from .models import *
 from .admin import *
+import decimal
 
 from scripts import processCheck
 
@@ -421,22 +422,29 @@ def atm_page(request, account_id):
     if request.method == "POST":
         # if 'withdrawal' in request.POST:
         # account_id = request.POST.get('account')
-        withdrawal_amount = request.POST.get('withdrawal_amount')
-
+        withdrawal_amount = request.POST.get('withdrawal')
         try:
-            account = Accounts.objects.get(id=account_id)
+            # Convert withdrawal_amount to a decimal to ensure correct subtraction
+            withdrawal_amount = decimal.Decimal(withdrawal_amount)
 
-            
+            if withdrawal_amount <= 0:
+                messages.error(request, "Withdrawal amount must be greater than zero.")
+                return redirect('atm_page', account_id=account_id)
+
+            if withdrawal_amount > account.balance:
+                messages.error(request, "Insufficient funds.")
+                return redirect('atm_page', account_id=account_id)
 
             account.balance -= withdrawal_amount
             account.save()
 
             return redirect('withdraw_success')
 
-        except Accounts.DoesNotExist:
-            messages.error(request, "Selected account does not exist.")
-            return redirect('atm_page')
+        except decimal.InvalidOperation:
+            messages.error(request, "Invalid withdrawal amount.")
+            return redirect('atm_page', account_id=account_id)
 
+        
     # accounts = request.user.accounts.all()
     return render(request, 'atm_page.html', {"account": account})
 
