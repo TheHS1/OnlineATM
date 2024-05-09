@@ -4,6 +4,20 @@
 
 <div class="container mt-4">
     <h1>Bank Reports</h1>
+
+    <hr>
+
+    <h4>Total Amount in Bank: <span style="font-weight: normal;">${{ total_amount_in_bank|floatformat:2 }}</span></h4>
+    <h4>Average Account Balance: <span style="font-weight: normal;">${{ average_balance|floatformat:2 }}</span></h4>
+    
+    <h4>Total Amount by Account Type:</h4>
+    <ul>
+        {% for account in total_by_account_type %}
+        <li>{{ account.account_type }}: <span style="font-weight: normal;">${{ account.total|floatformat:2 }}</span></li>
+        {% endfor %}
+    </ul>
+
+    <h1>Activity Report</h1>
     <hr>
 
     <form method="POST">
@@ -23,11 +37,11 @@
     
     {% if accounts_within_range %}
     <div class="mt-4">
-        <h2>Accounts Opened within Date Range</h2>
+        <h2>Accounts Opened within Date Range ({{ accounts_within_range.count }})</h2>
         <ul class="list-group">
             {% for account in accounts_within_range %}
             <li class="list-group-item">
-                {{ account.user_id }} - {{ account.account_type }} - {{ account.balance }} - {{ account.date_opened }}
+                {{account.id}} - {{ account.user_id }} - Type: {{ account.account_type }} - {{ account.balance }} - {{ account.date_opened }}
             </li>
             {% endfor %}
         </ul>
@@ -38,17 +52,32 @@
 
     {% if users_within_range %}
     <div class="mt-4">
-        <h2>Customer Accounts Opened within Date Range</h2>
+        <h2>Customer Accounts Opened within Date Range ({{ users_within_range.count }})</h2>
         <ul class="list-group">
             {% for user in users_within_range %}
             <li class="list-group-item">
-                User ID: {{ user.id }} - Name: {{ user.first_name }} {{ user.last_name }} - Email: {{ user.email }} - Phone: {{ user.phone_number }} - Address: {{ user.address }} - Opened: {{ user.date_opened }}
+                Name: {{ user.first_name }} {{ user.last_name }} - Email: {{ user.email }} - Phone: {{ user.phone_number }} - Address: {{ user.address }} - Opened: {{ user.date_opened }}
             </li>
             {% endfor %}
         </ul>
     </div>
     {% else %}
     <p class="mt-4">No customer accounts found within the given date range.</p>
+    {% endif %}
+
+    {% if deleted_accounts_within_range %}
+    <div class="mt-4">
+        <h2>Deleted Accounts within Date Range ({{ deleted_accounts_within_range.count }})</h2>
+        <ul class="list-group">
+            {% for account in deleted_accounts_within_range %}
+            <li class="list-group-item">
+                {{account.id}} - {{ account.user_id }} - Type: {{ account.account_type }} - Balance: {{ account.balance }} - Opened: {{ account.date_opened }} - Deleted: {{ account.date_deleted }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <p class="mt-4">No deleted accounts found within the given date range.</p>
     {% endif %}
 
 </div>
