@@ -353,15 +353,15 @@ def atm_login(request):
             pin = form.cleaned_data['pin']
             # Assuming Accounts model has fields 'account_number' and 'pin'
             
-            if Accounts.objects.get(id=account_number) and Users.objects.get(pin=pin):
+            account = Accounts.objects.filter(id=account_number).first()
+            if account and account.user_id.pin == pin:
                 # Redirect the user to the appropriate URL after successful login
                 return redirect('atm_page', account_id=account_number)  # Redirect to the ATM page
             else:
                 # If authentication fails, add an error to the form
                 form.add_error(None, "Invalid account number or PIN")
-    else:
-        form = ATMLoginForm()
-    
+
+    form = ATMLoginForm()
     return render(request, 'atm_login.html', {'form': form})
 
 # @login_required
