@@ -9,7 +9,8 @@ from django_otp.plugins.otp_totp.models import TOTPDevice
 from django.db.models import Sum, Avg
 from .forms import *
 from .models import *
-import uuid
+from .admin import *
+import decimal
 
 from scripts import processCheck
 
@@ -23,7 +24,6 @@ from base64 import b64encode
 def home(request):
     if request.method == "POST":
         devices = devices_for_user(request.user, confirmed=None)
-
         # check if otp form was submitted or normal login form
         if ('verify' in request.POST):
             form = OtpForm(request.POST)
@@ -110,31 +110,57 @@ def register_view(request):
 
 def reset_password(request):
     if request.method == "POST":
-        form = ResetForm(request.POST)
-        if (form.is_valid()) and (form.cleaned_data['password2'] == form.cleaned_data['password3']):
-            emailLogin = form.cleaned_data['email']
-            passwordLogin = form.cleaned_data['password1']
-            pinLogin = form.cleaned_data['pin']
-            user = authenticate(request, email=emailLogin, password=passwordLogin, pin=pinLogin)
-            
-            if (user is not None):
-                user.set_password(form.cleaned_data["password2"])
-                user.save()
-            else:
-                error_message = "Account does not exist."
-                return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
-            return redirect('home')
-        
-        elif ((form.cleaned_data['password2'] != form.cleaned_data['password3'])):
-            error_message = "Passwords do not match"
-            return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
-        
+        devices = devices_for_user(request.user, confirmed=None)
+        print("1")
+        # check if otp form was submitted or normal login form
+        if ('verify' in request.POST):
+            form = OtpForm(request.POST)
+            print("2")
+            # check if submitted token matches device token
+            if form.is_valid():
+                print("3")
+                token = form.cleaned_data['otp_token']
+                for device in devices:
+                    if isinstance(device, TOTPDevice) and device.verify_token(token):
+                        if device.confirmed == False:
+                            device.confirmed = True;
+                            device.save()
+                        verifyOTP(request, device)
+                        return redirect('reset_password')
+                error_message = "Incorrect OTP code"
+                form = OtpForm()
+                return render(request, 'reset_password.html', {'form': form, 'title': 'Verify your identity', 'error_message': error_message})
         else:
-            error_message = "Invalid email or pin"
-            return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})
+            print("4")
+            hasDevice = False
+            form = ResetForm(request.POST)
+
+            # login user if valid
+            if form.is_valid() and form.cleaned_data["password2"] == form.cleaned_data["password3"]:
+                print("5")
+                emailLogin = form.cleaned_data['email']
+                user = authenticate(request, email=emailLogin)
+                
+                if user is not None:
+                    print("6")
+                    user.password = form.cleaned_data["password2"]
+                    user.save()
+                    # Check if the user has a registered otp device
+                    for device in devices:
+                        if isinstance(device, TOTPDevice):
+                            hasDevice = True
+                    if hasDevice:
+                        form = OtpForm()
+                        return render(request, 'reset_password.html', {'form': form, 'title': 'Verify your identity'})
+                    return redirect(otp_register)
+                else:
+                    print("7")
+                    error_message = "Invalid email."
+                return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})     
     else:
         form = ResetForm()
-
+        if request.user.is_verified():
+            return redirect('reset_password')
     return render(request, 'reset_password.html', {'form': form})
 
 @otp_required
@@ -144,7 +170,6 @@ def customer_view(request):
 @otp_required
 def logout_view(request):
     logout(request)
-    messages.success(request, "Sucessfully logged out")
     return redirect('home')
 
 @otp_required
@@ -160,13 +185,27 @@ def deposit_view(request):
             data = processCheck.getCheckInfo(checkTransaction.front.path)
 
             if all(value != '' for value in data.values()):
-                senderID = uuid.UUID(data['sender_account'])
-                sender = Accounts.objects.get(id=senderID)
+                sender_id = int(data['sender_account'])
+                sender_info = data['sender_info']
+                recorded_date = data['date']
+                spelled_amount = data['spelled_amount']
+                recipient = data['recipient']
+                memo = data['memo']
+                sender = Accounts.objects.get(id=sender_id)
 
                 if float(data['numerical_amount']) == float(amt):
                     if sender.balance >= amt:
                         transaction = Transactions.objects.create(destination=dest, source=sender, amount=amt)
+    # sender_info = models.CharField(max_length=100)
+    # writeDate = models.TimeField(auto_now_add=False)
+    # numericalAmount = models.CharField(max_length=100)
+    # recipientName = models.CharField(max_length=50)
+    # memo = models.CharField(max_length=100)
                         checkTransaction.transaction = transaction
+                        checkTransaction.sender_info = sender_info
+                        checkTransaction.spelled_amount = spelled_amount
+                        checkTransaction.recipient_name = recipient
+                        checkTransaction.memo = memo
 
                         sender.balance -= amt
                         dest.balance += amt
@@ -200,10 +239,56 @@ def user_settings(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Your account has been updated.')
-            return redirect('user_settings')
+            return redirect('confirm')
     else:
         form = UserSettingsForm(instance=request.user)
     return render(request, 'user_settings.html', {'form': form})
+
+def user_settings_password(request):
+    if request.method == "POST":
+        form = PasswordResetForm(request.POST)
+        if (form.is_valid()) and (form.cleaned_data['password2'] == form.cleaned_data['password3']):
+            passwordLogin = form.cleaned_data['password1']
+            user = authenticate(request, email=request.user.email, password=passwordLogin, pin=request.user.pin)
+            
+            if (user is not None):
+                user.set_password(form.cleaned_data["password2"])
+                user.save()
+                messages.success(request, "Password changed successfully")
+            else:
+                error_message = "Incorrect Old Password"
+                return render(request, 'user_settings_password.html', {'form': form, 'error_message': error_message})
+            return redirect('confirm')
+        else:
+            print(form.errors)
+            error_message = "Invalid password"
+            return render(request, 'user_settings_password.html', {'form': form, 'error_message': error_message})
+    else:
+        form = PasswordResetForm()
+    return render(request, 'user_settings_password.html', {"form": form})
+
+def user_settings_pin(request):
+    print(request.user.password)
+    print(request.user.email)
+    if request.method == "POST":
+        form = PinResetForm(request.POST)
+        if (form.is_valid()) and (form.cleaned_data['pin2'] == form.cleaned_data['pin3']):
+            pinLogin = form.cleaned_data['pin1']
+            if(request.user.is_authenticated and pinLogin == request.user.pin):
+                request.user.pin = (form.cleaned_data["pin2"])
+                request.user.save()
+                messages.success(request, "Pin changed successfully")
+            else:
+                error_message = "Incorrect Old Pin"
+                return render(request, 'user_settings_pin.html', {'form': form, 'error_message': error_message})
+            return redirect('confirm')
+        else:
+            print(form.errors)
+            error_message = "Invalid pin"
+            return render(request, 'user_settings_pin.html', {'form': form, 'error_message': error_message})
+    else:
+        form = PinResetForm()
+    return render(request, 'user_settings_pin.html', {"form": form})
 
 @otp_required
 def transaction_history(request):
@@ -240,6 +325,23 @@ def accounts_view(request):
     form = addAccountForm()
     accounts = Accounts.objects.filter(user_id=request.user)
     return render(request, 'accounts_view.html', {'form': form, 'accounts': accounts})
+@otp_required
+def confirm_account_deletion(request):
+    if request.method == "POST":
+        account_id = request.POST.get('account_id')
+        if account_id:
+            account = Accounts.objects.filter(id=account_id, user_id=request.user).first()
+            if account:
+                account.delete()
+                messages.success(request, "Account closed successfully.")
+                return redirect('confirm')
+            else:
+                messages.error(request, "Account not found.")
+        else:
+            messages.error(request, "No account selected for deletion.")
+        return redirect("accounts_view")
+    else:
+        return redirect('accounts_view')
 
 def confirm(request):
     return render(request, 'confirmation.html')
@@ -252,9 +354,10 @@ def confirm(request):
     return render(request, 'confirmation.html')
 
 @otp_required
+@otp_required
 def transfer_funds(request):
     if request.method == "POST":
-        form = TansferFundsForm(request.POST)
+        form = TransferFundsForm(request.POST)
         form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user)
         form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
         if form.is_valid():
@@ -276,70 +379,113 @@ def transfer_funds(request):
 
             return redirect("confirm")
 
-    form = TansferFundsForm()
+    form = TransferFundsForm()
     form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user)
     form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
     return render(request, 'transfer_funds.html', {"form": form})
 
-def atm_login(request):
-    if request.method == "POST":
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data['email']
-            pin = form.cleaned_data['pin']
-            user = authenticate(request, email=email, pin=pin)
-            
-            if user is not None:
-                login(request, user)
-                # Redirect the user to the appropriate URL after successful login
-                return redirect('ATM.html')  # Redirect to ATM.html
-            else:
-                # If authentication fails, add an error to the form
-                form.add_error(None, "Invalid email or PIN")
-    else:
-        form = LoginForm()
-    
-    return render(request, 'atm_login.html', {'form': form})
-
-
-def atm_page(request):
-    return render(request, 'ATM.html')
-
-def withdrawal(request):
-    return render(request, 'atm_login.html')
-
-#def withdrawal(request):
-    if request.method == "POST":
-        account_id = request.POST.get('account')
-        withdrawal_amount = int(request.POST.get('withdrawal_amount'))
-
-        # Retrieve the selected account
-        account = Accounts.objects.get(pk=account_id)
-
-        # Check if the withdrawal amount exceeds the available balance
-        if withdrawal_amount > account.balance:
-            # Display error message if the withdrawal amount is greater than the available balance
-            messages.error(request, "Insufficient funds. Please enter a lower withdrawal amount.")
-            return redirect('withdrawal')
-
-        # Subtract withdrawal amount from the account balance
-        account.balance -= withdrawal_amount
-        account.save()
-
-        # Redirect to a success page or another view
-        return redirect('success_page')
-
-    # Fetch user's accounts to populate the dropdown
-    accounts = request.user.accounts.all()  # Assuming the user's accounts are related to the user model
-
-    return render(request, 'withdrawal.html', {'accounts': accounts})
-
+@otp_required
 def admin_view(request):
     if request.user.is_superuser:
         return render(request, 'admin_view.html')
     
 def admin_transaction_history(request):
     return render(request, 'admin_transaction_history.html')
+
+def bank_reports(request):
+    return render(request, 'bank_reports.html')
+
+def check_verification(request):
+    return render(request, 'check_verification.html')
+
+    form = TansferFundsForm()
+    form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user)
+    form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
+    return render(request, 'transfer_funds.html', {"form": form})
+
+
+def atm_login(request):
+    if request.method == "POST":
+        form = ATMLoginForm(request.POST)
+        if form.is_valid():
+            account_number = form.cleaned_data['account_number']
+            pin = form.cleaned_data['pin']
+            # Assuming Accounts model has fields 'account_number' and 'pin'
+            
+            if Accounts.objects.get(id=account_number) and Users.objects.get(pin=pin):
+                # Redirect the user to the appropriate URL after successful login
+                return redirect('atm_page', account_id=account_number)  # Redirect to the ATM page
+            else:
+                # If authentication fails, add an error to the form
+                form.add_error(None, "Invalid account number or PIN")
+    else:
+        form = ATMLoginForm()
+    
+    return render(request, 'atm_login.html', {'form': form})
+
+# @login_required
+def atm_page(request, account_id):
+    account = Accounts.objects.get(id=account_id)
+    if request.method == "POST":
+        # if 'withdrawal' in request.POST:
+        # account_id = request.POST.get('account')
+        withdrawal_amount = request.POST.get('withdrawal')
+        try:
+            # Convert withdrawal_amount to a decimal to ensure correct subtraction
+            withdrawal_amount = decimal.Decimal(withdrawal_amount)
+
+            if withdrawal_amount <= 0:
+                messages.error(request, "Withdrawal amount must be greater than zero.")
+                return redirect('atm_page', account_id=account_id)
+
+            if withdrawal_amount > account.balance:
+                messages.error(request, "Insufficient funds.")
+                return redirect('atm_page', account_id=account_id)
+
+            account.balance -= withdrawal_amount
+            account.save()
+
+            return redirect('withdraw_success')
+
+        except decimal.InvalidOperation:
+            messages.error(request, "Invalid withdrawal amount.")
+            return redirect('atm_page', account_id=account_id)
+
+        
+    # accounts = request.user.accounts.all()
+    return render(request, 'atm_page.html', {"account": account})
+
+
+def withdraw_success(request):
+    return render(request, 'withdraw_success.html')
+
+def admin_view(request):
+    if request.user.is_superuser:
+        return render(request, 'admin_view.html')
+    
+def admin_transaction_history(request):
+    transactions = Transactions.objects.all()
+    transactions = transactions.order_by('-timestamp')
+    try:
+        if request.method == "POST":
+            transaction_id = request.POST.get('transaction_id')
+            transaction = Transactions.objects.get(id=transaction_id)
+
+            amt = transaction.amount
+            src = transaction.source
+            dst = transaction.destination
+
+            src.balance += amt
+            dst.balance -= amt
+
+            src.save()
+            dst.save()
+
+            transaction.delete()
+    except:
+        pass
+        
+    return render(request, 'admin_transaction_history.html', {'transactions': transactions})
 
 def bank_reports(request):
     form = ReportForm(request.POST or None)

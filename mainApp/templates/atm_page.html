@@ -6,11 +6,21 @@
     <title>ATM Withdrawal</title>
     <style>
         body {
-            background-color: #1a1a1a;
-            color: #ffd700; /* Gold */
+            background-color: #ffffff; /* White */
+            color: #000000; /* Black */
             font-family: Arial, sans-serif;
             text-align: center;
             margin-top: 50px;
+            border: 2px solid #000000; /* Black border */
+            padding: 20px; /* Add padding for spacing */
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Add shadow for depth */
+        }
+        h1 {
+            font-size: 48px;
+            margin-bottom: 30px;
+            color: #000000; /* Black */
+            text-transform: uppercase; /* Convert text to uppercase */
+            letter-spacing: 3px; /* Add letter spacing for style */
         }
         h2 {
             font-size: 32px;
@@ -20,13 +30,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin-top: 20px;
         }
         label {
             display: block;
             margin-bottom: 10px;
             font-size: 18px;
         }
-        select,
         input[type="text"] {
             width: 300px;
             padding: 12px;
@@ -35,12 +45,12 @@
             border-radius: 5px;
             font-size: 16px;
             background-color: #333333; /* Black */
-            color: #ffd700; /* Gold */
+            color: #ffffff; /* White */
         }
         button[type="submit"] {
             padding: 12px 24px;
-            background-color: #ffd700; /* Gold */
-            color: #000000; /* Black */
+            background-color: #333333; /* Black */
+            color: #ffffff; /* White */
             border: none;
             border-radius: 5px;
             font-size: 18px;
@@ -48,20 +58,21 @@
             transition: background-color 0.3s ease;
         }
         button[type="submit"]:hover {
-            background-color: #ffdf00; /* Lighter shade of gold on hover */
+            background-color: #000000; /* Darker shade of black on hover */
         }
     </style>
 </head>
 <body>
+    <h1>Frank Vault ATM</h1> <!-- Title added here -->
     <h2>How much would you like to withdraw?</h2>
-    <form method="POST">
-        <label for="account">Select Account:</label>
-        <select id="account" name="account">
-            <option value="checking">Checking - Balance: $500</option>
-            <option value="savings">Savings - Balance: $1000</option>
-        </select><br><br>
-        <label for="withdrawal_amount">Enter amount:</label>
-        <input type="text" id="withdrawal_amount" name="withdrawal_amount" required><br><br>
+    <form method="POST" action="">
+        {% csrf_token %}
+        <label for="account">Account Number:</label>
+        <input type="text" id="account" name="account" value="{{ account.id }}" readonly><br><br>
+        <label for="balance">Balance:</label>
+        <input type="text" id="balance" name="balance" value="${{ account.balance }}" readonly><br><br>
+        <label for="withdrawal">Enter amount:</label>
+        <input type="text" id="withdrawal" name="withdrawal" required><br><br>
         <button type="submit">Withdraw</button>
     </form>
 </body>

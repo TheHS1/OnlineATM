@@ -9,8 +9,6 @@ from datetime import date
 accountOptions = (('Checkings', 'Checkings'), 
                   ('Savings', 'Savings'), ('Business', 'Business'))
 
-accountOptions = (('Checkings', 'Checkings'), 
-                  ('Savings', 'Savings'), ('Business', 'Business'))
 
 class LoginForm(forms.Form):
     email = forms.EmailField(label='Email address', widget=forms.EmailInput(attrs={'class': 'form-control', 'id': 'email', 'aria-describedby': 'emailHelp'}))
@@ -39,15 +37,13 @@ class UploadCheckForm(ModelForm):
         model = checkTransactions
         fields = ["front"]
 
-class TansferFundsForm(forms.Form):
+class TransferFundsForm(forms.Form):
     account1 = forms.ModelChoiceField(queryset=None)
     account2 = forms.ModelChoiceField(queryset=None)
     amount = forms.DecimalField(decimal_places=2, widget=forms.NumberInput(attrs={'class': 'form-control', 'id': 'inputAmount', 'placeholder': '0.00'}))
 
 class ResetForm(forms.Form):
     email = forms.EmailField(label='Email address', widget=forms.EmailInput(attrs={'class': 'form-control', 'id': 'email', 'aria-describedby': 'emailHelp'}))
-    pin = forms.CharField(label='Pin', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'pin'}))
-    password1 = forms.CharField(label='Old Password', widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'password1'}))
     password2 = forms.CharField(label='New Password', widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'password2'}))
     password3 = forms.CharField(label='Re-Enter New Password', widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'password3'}))
 
@@ -65,6 +61,19 @@ class UserSettingsForm(forms.ModelForm):
         model = Users
         fields = ['first_name', 'last_name', 'email', 'phone_number', 'address']
 
+class PasswordResetForm(forms.Form):
+    password1 = forms.CharField(label='Old Password', widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'password1'}))
+    password2 = forms.CharField(label='New Password', widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'password2'}))
+    password3 = forms.CharField(label='Re-Enter New Password', widget=forms.PasswordInput(attrs={'class': 'form-control', 'id': 'password3'}))
+
+class PinResetForm(forms.Form):
+    pin1 = forms.CharField(label='Old Pin', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'pin1'}))
+    pin2 = forms.CharField(label='New Pin', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'pin2'}))
+    pin3 = forms.CharField(label='Re-Enter New Pin', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'pin3'}))
+
 class ReportForm(forms.Form):
     start_date = forms.DateField(label='Start Date', widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
     end_date = forms.DateField(label='End Date', widget=forms.DateInput( attrs={'type': 'date', 'class': 'form-control'}))
+class ATMLoginForm(forms.Form):
+    account_number = forms.CharField(label='Account Number', max_length=100, widget=forms.TextInput(attrs={'required': True}))
+    pin = forms.CharField(label='PIN', widget=forms.PasswordInput(attrs={'required': True}))
