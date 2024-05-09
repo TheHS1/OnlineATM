@@ -36,6 +36,7 @@ class Accounts(models.Model):
     balance = models.DecimalField(decimal_places=2, max_digits=50, default=0, null=False)
     date_opened = models.DateField(auto_now_add = True, null=False)
     account_type = models.CharField(max_length=50, null=False)
+    is_deleted = models.BooleanField(default=False, editable=True)
 
 
 class Transactions(models.Model):

@@ -9,6 +9,7 @@ from django_otp.plugins.otp_totp.models import TOTPDevice
 from .forms import *
 from .models import *
 from .admin import *
+import decimal
 
 from scripts import processCheck
 
@@ -174,7 +175,7 @@ def logout_view(request):
 def deposit_view(request):
     if request.method == "POST":
         form = UploadCheckForm(request.POST, request.FILES)
-        form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user)
+        form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user, is_deleted=False)
         if form.is_valid():
             dest = form.cleaned_data["account"]
             amt = form.cleaned_data["amount"]
@@ -243,7 +244,7 @@ def deposit_view(request):
             return redirect("confirm")
 
     form = UploadCheckForm()
-    form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user)
+    form.fields['account'].queryset = Accounts.objects.filter(user_id = request.user, is_deleted=False)
     return render(request, 'deposit_view.html', {"form": form})
 
 @otp_required
@@ -330,7 +331,7 @@ def accounts_view(request):
         return redirect("accounts_view")
 
     form = addAccountForm()
-    accounts = Accounts.objects.filter(user_id=request.user)
+    accounts = Accounts.objects.filter(user_id=request.user, is_deleted=False)
     return render(request, 'accounts_view.html', {'form': form, 'accounts': accounts})
 @otp_required
 def confirm_account_deletion(request):
@@ -339,7 +340,8 @@ def confirm_account_deletion(request):
         if account_id:
             account = Accounts.objects.filter(id=account_id, user_id=request.user).first()
             if account:
-                account.delete()
+                account.is_deleted = True
+                account.save()
                 messages.success(request, "Account closed successfully.")
                 return redirect('confirm')
             else:
@@ -365,8 +367,8 @@ def confirm(request):
 def transfer_funds(request):
     if request.method == "POST":
         form = TransferFundsForm(request.POST)
-        form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user)
-        form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
+        form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user, is_deleted=False)
+        form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user, is_deleted=False)
         if form.is_valid():
             srce = form.cleaned_data["account1"] # account money taken from
             dest = form.cleaned_data["account2"] # account getting money
@@ -387,8 +389,8 @@ def transfer_funds(request):
             return redirect("confirm")
 
     form = TransferFundsForm()
-    form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user)
-    form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user)
+    form.fields['account1'].queryset = Accounts.objects.filter(user_id = request.user, is_deleted=False)
+    form.fields['account2'].queryset = Accounts.objects.filter(user_id = request.user, is_deleted=False)
     return render(request, 'transfer_funds.html', {"form": form})
 
 def atm_login(request):
@@ -416,20 +418,29 @@ def atm_page(request, account_id):
     if request.method == "POST":
         # if 'withdrawal' in request.POST:
         # account_id = request.POST.get('account')
-        withdrawal_amount = request.POST.get('withdrawal_amount')
-
+        withdrawal_amount = request.POST.get('withdrawal')
         try:
-            account = Accounts.objects.get(id=account_id)
+            # Convert withdrawal_amount to a decimal to ensure correct subtraction
+            withdrawal_amount = decimal.Decimal(withdrawal_amount)
+
+            if withdrawal_amount <= 0:
+                messages.error(request, "Withdrawal amount must be greater than zero.")
+                return redirect('atm_page', account_id=account_id)
+
+            if withdrawal_amount > account.balance:
+                messages.error(request, "Insufficient funds.")
+                return redirect('atm_page', account_id=account_id)
 
             account.balance -= withdrawal_amount
             account.save()
 
             return redirect('withdraw_success')
 
-        except Accounts.DoesNotExist:
-            messages.error(request, "Selected account does not exist.")
-            return redirect('atm_page')
+        except decimal.InvalidOperation:
+            messages.error(request, "Invalid withdrawal amount.")
+            return redirect('atm_page', account_id=account_id)
 
+        
     # accounts = request.user.accounts.all()
     return render(request, 'atm_page.html', {"account": account})
 
