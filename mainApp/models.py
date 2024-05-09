@@ -19,6 +19,14 @@ class Users(AbstractUser):
     def __str__(self):
         return self.first_name + " " + self.last_name
     
+class DeletedAccount(models.Model):
+    account_id = models.UUIDField()
+    user_id = models.ForeignKey('Users', on_delete=models.SET_NULL, null=True)
+    balance = models.DecimalField(decimal_places=2, max_digits=50)
+    date_opened = models.DateField()
+    account_type = models.CharField(max_length=50)
+    date_deleted = models.DateField(auto_now_add = True, null=True)
+    
 class Accounts(models.Model):
     def generateID():
         unique = False    
