@@ -2,6 +2,7 @@ from django import forms
 from django.forms import ModelForm
 from .models import Users
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.validators import MinLengthValidator
 from django.forms import ModelForm
 from .models import checkTransactions
 
@@ -25,7 +26,7 @@ class RegisterForm(ModelForm):
     last_name = forms.CharField(label='Last Name', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'last_name'}))
     phone_number = forms.CharField(label='Phone Number', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'phone_number'}))
     address = forms.CharField(label='Address', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'address'}))
-    pin = forms.CharField(label='Pin', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'pin'}))
+    pin = forms.CharField(label='Pin', widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'pin'}), validators=[MinLengthValidator(4)])
 
     class Meta:
         model = Users

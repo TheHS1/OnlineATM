@@ -39,11 +39,13 @@
             {{ form.pin }}
           </div>
         </div>
+        {% if form.errors %}
+            {% for k, v in form.errors.items %}
+                <p> {{k}}: {{v}} </p>
+            {% endfor %}
+        {% endif %}
         <div class="text-center">
-          {% if error_message %}
-            <p>{{ error_message }}</p>
-          {% endif %}
-          <button type="submit" class="btn btn-secondary">Sign up</button>
+            <button type="submit" class="btn btn-secondary">Sign up</button>
         </div>
       </form>
     </div>

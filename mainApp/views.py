@@ -106,8 +106,7 @@ def register_view(request):
             user.save()
             return redirect('home')
         else:
-            error_message = "Invalid credentials."
-            return render(request, 'register_view.html', {'form': form, 'error_message': error_message})
+            return render(request, 'register_view.html', {'form': form})
     else:
         form = RegisterForm()
     return render(request, 'register_view.html', {'form': form})
