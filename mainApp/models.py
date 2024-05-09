@@ -53,7 +53,7 @@ class Transactions(models.Model):
     destination = models.ForeignKey(Accounts, on_delete=models.PROTECT, null=False, related_name='destination')
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     amount = models.IntegerField(null = False)
-    timestamp = models.TimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
     error = models.BooleanField(default=False)
 
 class checkTransactions(models.Model):
