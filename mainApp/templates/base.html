@@ -11,7 +11,7 @@
   </head>
   <body>
     {% if user.is_authenticated %}
-      {% if not request.resolver_match.view_name == 'home' and not request.resolver_match.view_name == 'register_view' and not request.resolver_match.view_name == 'reset_password' %}
+      {% if not request.resolver_match.view_name == 'home' and not request.resolver_match.view_name == 'register_view' and not request.resolver_match.view_name == 'reset_password' and not request.resolver_match.view_name == 'otp_verify'%}
         {% include 'navbar.html' %}
       {% endif %}
     {% endif %}

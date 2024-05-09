@@ -1,10 +1,14 @@
 from django.urls import path
+from django.contrib.auth import views as auth_views
+
 from . import views
+from .forms import ResetForm
 
 urlpatterns = [
     path('', views.home, name='home'),
     path('confirmation/', views.confirm, name='confirm'),
     path('otp_register/', views.otp_register, name='otp_register'),
+    path('otp_verify/', views.otp_verify, name='otp_verify'),
     path('customer_view/', views.customer_view, name='customer_view'),
     path('admin_view/', views.admin_view, name='admin_view'),
     path('deposit_view/', views.deposit_view, name='deposit_view'),
@@ -15,7 +19,12 @@ urlpatterns = [
     path('accounts_view/', views.accounts_view, name='accounts_view'),
     path('transfer_funds/', views.transfer_funds, name='transfer_funds'),
     path('register_view/', views.register_view, name='register_view'),
-    path('reset_password/', views.reset_password, name='reset_password'),
+    path('reset_password/', auth_views.PasswordResetView.as_view(template_name='reset_password.html'), name='reset_password'),
+    path('reset_password_sent/', auth_views.PasswordResetDoneView.as_view(template_name='pass_sent.html'), name='password_reset_done'),
+    path('reset_password/<uidb64>/<token>/', 
+         auth_views.PasswordResetConfirmView.as_view(template_name='reset_password.html', form_class=ResetForm), 
+         name='password_reset_confirm'),
+    path('reset_password_success', auth_views.PasswordResetCompleteView.as_view(template_name='pass_success.html'), name='password_reset_complete'),
     path('atm_login/', views.atm_login, name='atm_login'),
     path('atm_login/ATM.html', views.atm_page, name='ATM.html'),
     path('logout_view', views.logout_view, name='logout_view'),

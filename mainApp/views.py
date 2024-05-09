@@ -20,9 +20,9 @@ from base64 import b64encode
 
 # Create your views here.
 
-def home(request):
+def otp_verify(request):
+    devices = devices_for_user(request.user, confirmed=None)
     if request.method == "POST":
-        devices = devices_for_user(request.user, confirmed=None)
         # check if otp form was submitted or normal login form
         if ('verify' in request.POST):
             form = OtpForm(request.POST)
@@ -43,29 +43,34 @@ def home(request):
                 error_message = "Incorrect OTP code"
                 form = OtpForm()
                 return render(request, 'home.html', {'form': form, 'title': 'Verify your identity', 'error_message': error_message})
-        else:
-            hasDevice = False
-            form = LoginForm(request.POST)
+    # Check if the user has a registered otp device
+    hasDevice = False;
+    for device in devices:
+        if isinstance(device, TOTPDevice):
+            hasDevice = True
+    if hasDevice:
+        form = OtpForm()
+        return render(request, 'home.html', {'form': form, 'title': 'Verify your identity',})
+    return redirect(otp_register)
 
-            # login user if valid
-            if form.is_valid():
-                emailLogin = form.cleaned_data['email']
-                passwordLogin = form.cleaned_data['password']
-                user = authenticate(request, email=emailLogin, password=passwordLogin)
-                
-                if user is not None:
-                    login(request, user)
-                    # Check if the user has a registered otp device
-                    for device in devices:
-                        if isinstance(device, TOTPDevice):
-                            hasDevice = True
-                    if hasDevice:
-                        form = OtpForm()
-                        return render(request, 'home.html', {'form': form, 'title': 'Verify your identity'})
-                    return redirect(otp_register)
-                else:
-                    error_message = "Invalid username or password."
-                return render(request, 'home.html', {'form': form, 'error_message': error_message})
+
+def home(request):
+    if request.method == "POST":
+        hasDevice = False
+        form = LoginForm(request.POST)
+
+        # login user if valid
+        if form.is_valid():
+            emailLogin = form.cleaned_data['email']
+            passwordLogin = form.cleaned_data['password']
+            user = authenticate(request, email=emailLogin, password=passwordLogin)
+            
+            if user is not None:
+                login(request, user)
+                return redirect(otp_verify)
+            else:
+                error_message = "Invalid username or password."
+            return render(request, 'home.html', {'form': form, 'error_message': error_message})
     else:
         form = LoginForm()
         if request.user.is_verified():
@@ -106,61 +111,6 @@ def register_view(request):
     else:
         form = RegisterForm()
     return render(request, 'register_view.html', {'form': form})
-
-def reset_password(request):
-    if request.method == "POST":
-        devices = devices_for_user(request.user, confirmed=None)
-        print("1")
-        # check if otp form was submitted or normal login form
-        if ('verify' in request.POST):
-            form = OtpForm(request.POST)
-            print("2")
-            # check if submitted token matches device token
-            if form.is_valid():
-                print("3")
-                token = form.cleaned_data['otp_token']
-                for device in devices:
-                    if isinstance(device, TOTPDevice) and device.verify_token(token):
-                        if device.confirmed == False:
-                            device.confirmed = True;
-                            device.save()
-                        verifyOTP(request, device)
-                        return redirect('reset_password')
-                error_message = "Incorrect OTP code"
-                form = OtpForm()
-                return render(request, 'reset_password.html', {'form': form, 'title': 'Verify your identity', 'error_message': error_message})
-        else:
-            print("4")
-            hasDevice = False
-            form = ResetForm(request.POST)
-
-            # login user if valid
-            if form.is_valid() and form.cleaned_data["password2"] == form.cleaned_data["password3"]:
-                print("5")
-                emailLogin = form.cleaned_data['email']
-                user = authenticate(request, email=emailLogin)
-                
-                if user is not None:
-                    print("6")
-                    user.password = form.cleaned_data["password2"]
-                    user.save()
-                    # Check if the user has a registered otp device
-                    for device in devices:
-                        if isinstance(device, TOTPDevice):
-                            hasDevice = True
-                    if hasDevice:
-                        form = OtpForm()
-                        return render(request, 'reset_password.html', {'form': form, 'title': 'Verify your identity'})
-                    return redirect(otp_register)
-                else:
-                    print("7")
-                    error_message = "Invalid email."
-                return render(request, 'reset_password.html', {'form': form, 'error_message': error_message})     
-    else:
-        form = ResetForm()
-        if request.user.is_verified():
-            return redirect('reset_password')
-    return render(request, 'reset_password.html', {'form': form})
 
 @otp_required
 def customer_view(request):
