@@ -301,18 +301,7 @@ def transaction_history(request):
 
 @otp_required
 def accounts_view(request):
-    if request.method == "POST":
-        if 'delete' in request.POST and request.user.is_authenticated:
-            account_id = request.POST['account_id']
-            account = Accounts.objects.filter(user_id=request.user, id=account_id).first()
 
-            if account:
-                DeletedAccount.objects.create(account_id=account.id, user_id=account.user_id, balance=account.balance, date_opened=account.date_opened, account_type=account.account_type,)
-                account.delete()
-                messages.success(request, "Account closed successfully.")
-                return redirect("confirm")
-                
-        elif 'add' in request.POST and request.user.is_authenticated:
     if request.method == "POST" and request.user.is_authenticated:
         if 'delete' in request.POST:
             request.session['account_id_to_delete'] = request.POST['account_id']
@@ -330,6 +319,7 @@ def accounts_view(request):
     form = addAccountForm()
     accounts = Accounts.objects.filter(user_id=request.user, is_deleted=False)
     return render(request, 'accounts_view.html', {'form': form, 'accounts': accounts})
+
 @otp_required
 def confirm_account_deletion(request):
     if request.method == "POST":
@@ -495,21 +485,22 @@ def admin_transaction_history(request):
 
 def bank_reports(request):
     form = ReportForm(request.POST or None)
-    accounts_within_range = None
-    users_within_range = None
-    deleted_accounts_within_range = None
-    total_amount_in_bank = Accounts.objects.aggregate(total=Sum('balance'))['total'] or 0
-    average_balance = Accounts.objects.aggregate(average=Avg('balance'))['average'] or 0
-    total_by_account_type = Accounts.objects.values('account_type').annotate(total=Sum('balance'))
+    accounts_within_range = Accounts.objects.none()
+    users_within_range = Users.objects.none()
+    deleted_accounts_within_range = Accounts.objects.none()
 
-    if request.method == "POST":
+    total_amount_in_bank = Accounts.objects.filter(is_deleted=False).aggregate(total=Sum('balance'))['total'] or 0
+    average_balance = Accounts.objects.filter(is_deleted=False).aggregate(average=Avg('balance'))['average'] or 0
+    total_by_account_type = Accounts.objects.filter(is_deleted=False).values('account_type').annotate(total=Sum('balance'))
+
+    if request.method == "POST" and form.is_valid():
         if form.is_valid():
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
 
             accounts_within_range = Accounts.objects.filter(date_opened__gte=start_date, date_opened__lte=end_date)
-            users_within_range = Users.objects.filter(date_opened__gte=start_date, date_opened__lte=end_date)
-            deleted_accounts_within_range = DeletedAccount.objects.filter(date_deleted__gte=start_date, date_deleted__lte=end_date)
+            users_within_range = Users.objects.filter(date_opened__gte=start_date, date_opened__lte=end_date, is_superuser=False)
+            deleted_accounts_within_range = Accounts.objects.filter(date_opened__gte=start_date, date_opened__lte=end_date, is_deleted=True)
     
     return render(request, 'bank_reports.html', {'form': form, 'accounts_within_range': accounts_within_range, 
                                                  'users_within_range': users_within_range, 

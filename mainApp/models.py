@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
 import random
+from django.utils import timezone
 
 class Users(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -19,14 +20,6 @@ class Users(AbstractUser):
     def __str__(self):
         return self.first_name + " " + self.last_name
     
-class DeletedAccount(models.Model):
-    account_id = models.UUIDField()
-    user_id = models.ForeignKey('Users', on_delete=models.SET_NULL, null=True)
-    balance = models.DecimalField(decimal_places=2, max_digits=50)
-    date_opened = models.DateField()
-    account_type = models.CharField(max_length=50)
-    date_deleted = models.DateField(auto_now_add = True, null=True)
-    
 class Accounts(models.Model):
     def generateID():
         unique = False    
@@ -36,6 +29,8 @@ class Accounts(models.Model):
                 unique = True
         return value
 
+    def __str__(self):
+        return str(self.id) + " (" + self.account_type + ")" 
 
     id = models.IntegerField(primary_key=True, default = generateID)
     user_id = models.ForeignKey(Users, on_delete=models.CASCADE, null=False)
@@ -43,7 +38,14 @@ class Accounts(models.Model):
     date_opened = models.DateField(auto_now_add = True, null=False)
     account_type = models.CharField(max_length=50, null=False)
     is_deleted = models.BooleanField(default=False, editable=True)
+    date_deleted = models.DateField(null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        if self.is_deleted and not self.date_deleted:
+            self.date_deleted = timezone.now().date()
+        elif not self.is_deleted:
+            self.date_deleted = None  
+        super().save(*args, **kwargs)
 
 class Transactions(models.Model):
     source = models.ForeignKey(Accounts, on_delete=models.PROTECT, null=False, related_name='source')
