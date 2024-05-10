@@ -17,7 +17,11 @@
       {% for transaction in transactions %}
       <tr>
         <td>{{ transaction.source.id }}</td>
+	{% if transaction.destination.id == None %}
+	<td>ATM Transaction</td>
+	{% else %}
         <td>{{ transaction.destination.id }}</td>
+	{% endif%}
         <td>{{ transaction.amount }}</td>
         <td>{{ transaction.timestamp }}</td>
         <td>

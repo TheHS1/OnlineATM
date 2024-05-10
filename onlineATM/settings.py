@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-from pathlib import Path
+from pathlib import Path 
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("SECRET_KEY") # found in .env
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["frankvault.csproject.org"]
 
 
 # Application definition
@@ -125,11 +125,16 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATIC_ROOT = '/var/www/frankvault.csproject.org/static'
+
 STATICFILES_DIRS = [
     BASE_DIR / 'mainApp/static',
 ]
 
-MEDIA_ROOT = 'media/'
+MEDIA_URL = 'media/'
+
+MEDIA_ROOT = "/var/www/frankvault.csproject.org/media"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -147,3 +152,7 @@ EMAIL_HOST_USER = config("EMAIL")
 EMAIL_HOST_PASSWORD = config("EMAIL_KEY")
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
+CELERY_TIMEZONE = "America/Los_Angeles"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BROKER_URL = config("CELERY_BROKER_URL")

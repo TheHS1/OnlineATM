@@ -3,6 +3,7 @@
 {% block content %}
 <div class="container my-5">
   <h2 class="mb-4">My Transactions</h2>
+  <p>Note: transactions may take a while to show source and may disappear if found to be invalid</p>
   <table class="table table-striped table-bordered">
     <thead class="table-dark">
       <tr>
@@ -16,7 +17,11 @@
       {% for transaction in transactions %}
       <tr>
         <td>{{ transaction.source.id }}</td>
+	{% if transaction.destination.id == None %}
+	<td>ATM Transaction</td>
+	{% else %}
         <td>{{ transaction.destination.id }}</td>
+	{% endif%}
         <td>{{ transaction.amount }}</td>
         <td>{{ transaction.timestamp }}</td>
       </tr>

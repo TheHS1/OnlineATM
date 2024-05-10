@@ -10,7 +10,7 @@ class Users(AbstractUser):
     phone_number = models.CharField(max_length=15, null=False, default='')
     address = models.CharField(max_length=200, null=False, default='')
     email = models.EmailField(max_length=100, unique=True, default='')
-    pin = models.CharField(max_length=4, default='', validators=[MinLengthValidator(4)])
+    pin = models.CharField(max_length=100, default='')
     date_opened = models.DateField(auto_now_add = True, null=True)
 
     username = None
@@ -49,10 +49,10 @@ class Accounts(models.Model):
         super().save(*args, **kwargs)
 
 class Transactions(models.Model):
-    source = models.ForeignKey(Accounts, on_delete=models.PROTECT, null=False, related_name='source')
-    destination = models.ForeignKey(Accounts, on_delete=models.PROTECT, null=False, related_name='destination')
+    source = models.ForeignKey(Accounts, on_delete=models.PROTECT, null=True, related_name='source')
+    destination = models.ForeignKey(Accounts, on_delete=models.PROTECT, null=True, related_name='destination')
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    amount = models.IntegerField(null = False)
+    amount = models.DecimalField(max_digits=15, decimal_places=2, null = False)
     timestamp = models.DateTimeField(auto_now_add=True)
     error = models.BooleanField(default=False)
 

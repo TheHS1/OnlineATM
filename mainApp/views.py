@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required 
 from django.contrib import messages
 from django.http import HttpResponse
 from django_otp import devices_for_user, login as verifyOTP
@@ -12,7 +12,7 @@ from .models import *
 from .admin import *
 import decimal
 
-from scripts import processCheck
+from .tasks import *
 
 # For generating otp qr codes
 import qrcode
@@ -131,65 +131,14 @@ def deposit_view(request):
             amt = form.cleaned_data["amount"]
 
             checkTransaction = form.save()
-            data = processCheck.getCheckInfo(checkTransaction.front.path)
+            transaction = Transactions.objects.create(destination=dest, amount=amt)
+            transaction.save()
 
-            if all(value != '' for value in data.values()):
-                sender_id = int(data['sender_account'])
-                sender_info = data['sender_info']
-                recorded_date = data['date']
-                spelled_amount = data['spelled_amount']
-                recipient = data['recipient']
-                memo = data['memo']
-                sender = Accounts.objects.get(id=sender_id)
+            checkTransaction.transaction = transaction
+            checkTransaction.save()
+            procCheck.delay_on_commit(checkTransaction.id, checkTransaction.front.path)
 
-                if float(data['numerical_amount']) == float(amt):
-                    if sender.balance >= amt:
-                        transaction = Transactions.objects.create(destination=dest, source=sender, amount=amt)
-    # sender_info = models.CharField(max_length=100)
-    # writeDate = models.TimeField(auto_now_add=False)
-    # numericalAmount = models.CharField(max_length=100)
-    # recipientName = models.CharField(max_length=50)
-    # memo = models.CharField(max_length=100)
-                        checkTransaction.transaction = transaction
-                        checkTransaction.sender_info = sender_info
-                        checkTransaction.spelled_amount = spelled_amount
-                        checkTransaction.recipient_name = recipient
-                        checkTransaction.memo = memo
-
-                        sender.balance -= amt
-                        dest.balance += amt
-
-                        sender.save()
-                        dest.save()
-                        checkTransaction.save()
-
-                        messages.success(request, "Check deposited successfully.")
-                    else: 
-                        checkTransaction.delete()
-                        messages.error(request, "Source account has insufficient funds")
-
-                else:
-                    transaction = Transactions.objects.create(destination=dest, source=sender, amount=amt, error=True)
-
-                    checkTransaction.transaction = transaction
-                    checkTransaction.sender_info = sender_info
-                    checkTransaction.spelled_amount = spelled_amount
-                    checkTransaction.recipient_name = recipient
-                    checkTransaction.memo = memo
-
-                    checkTransaction.save()
-                    messages.error(request, "Check amount does not match listed amount")
-            else:
-                transaction = Transactions.objects.create(destination=dest, source=sender, amount=amt, error=True)
-
-                checkTransaction.transaction = transaction
-                checkTransaction.sender_info = sender_info
-                checkTransaction.spelled_amount = spelled_amount
-                checkTransaction.recipient_name = recipient
-                checkTransaction.memo = memo
-
-                checkTransaction.save()
-                messages.error(request, "Could not read check")
+            messages.success(request, "Check submitted. Your transaction is currently under review")
 
             return redirect("confirm")
 
@@ -259,7 +208,7 @@ def user_settings_pin(request):
 def transaction_history(request):
 
     user_accounts = Accounts.objects.filter(user_id=request.user)
-    transactions = Transactions.objects.filter(source__in=user_accounts) | Transactions.objects.filter(destination__in=user_accounts, error=False)
+    transactions = Transactions.objects.filter(source__in=user_accounts, error=False) | Transactions.objects.filter(destination__in=user_accounts, error=False)
     transactions = transactions.order_by('-timestamp')
 
     return render(request, 'transaction_history.html', {'transactions': transactions})
@@ -292,14 +241,20 @@ def confirm_account_deletion(request):
         if account_id:
             account = Accounts.objects.filter(id=account_id, user_id=request.user).first()
             if account:
-                account.is_deleted = True
-                account.save()
-                messages.success(request, "Account closed successfully.")
-                return redirect('confirm')
+                if account.balance == 0.0:
+                    account.is_deleted = True
+                    account.save()
+                    messages.success(request, "Account closed successfully.")
+                    return redirect('confirm')
+                else: 
+                    messages.error(request, "Only accounts with a balance of 0 can be deleted.")
+                    return redirect('confirm')
             else:
                 messages.error(request, "Account not found.")
+                return redirect('confirm')
         else:
             messages.error(request, "No account selected for deletion.")
+            return redirect('confirm')
         return redirect("accounts_view")
     else:
         return redirect('accounts_view')
@@ -325,7 +280,9 @@ def transfer_funds(request):
             srce = form.cleaned_data["account1"] # account money taken from
             dest = form.cleaned_data["account2"] # account getting money
             amt = form.cleaned_data["amount"]
-            if amt < 0:
+            if srce == dest:
+                messages.error(request, "Source and destination must be different accounts")
+            elif amt < 0:
                 messages.error(request, "Invalid input")
             elif srce.balance >= amt:
                 srce.balance -= amt;
@@ -353,15 +310,15 @@ def atm_login(request):
             pin = form.cleaned_data['pin']
             # Assuming Accounts model has fields 'account_number' and 'pin'
             
-            if Accounts.objects.get(id=account_number) and Users.objects.get(pin=pin):
+            account = Accounts.objects.filter(id=account_number).first()
+            if account and account.user_id.pin == pin:
                 # Redirect the user to the appropriate URL after successful login
                 return redirect('atm_page', account_id=account_number)  # Redirect to the ATM page
             else:
                 # If authentication fails, add an error to the form
                 form.add_error(None, "Invalid account number or PIN")
-    else:
-        form = ATMLoginForm()
-    
+
+    form = ATMLoginForm()
     return render(request, 'atm_login.html', {'form': form})
 
 # @login_required
@@ -383,6 +340,7 @@ def atm_page(request, account_id):
                 messages.error(request, "Insufficient funds.")
                 return redirect('atm_page', account_id=account_id)
 
+            transaction = Transactions.objects.create(source=account, amount=withdrawal_amount)
             account.balance -= withdrawal_amount
             account.save()
 
@@ -466,9 +424,13 @@ def check_verification(request):
             checkTransaction = checkTransactions.objects.get(transaction=transaction)
 
             if 'AuthButton' in request.POST:
+                print("Authed")
                 amt = transaction.amount
                 sender = transaction.source
                 dest = transaction.destination
+                print(amt)
+                print(sender)
+                print(dest)
 
                 sender.balance -= amt
                 dest.balance += amt
